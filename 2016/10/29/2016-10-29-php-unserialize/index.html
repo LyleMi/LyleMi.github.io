@@ -8,17 +8,17 @@
   <link rel="dns-prefetch" href="https://LyleMi.github.io">
   <title>php unserialize()/wakeup()漏洞 | Lyle&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="unserialize和serialize这里不做赘述。 unserialize的漏洞在magic function上，如果一个类定义了__wakup()和__destruct()，则该类的实例被反序列化时，会自动调用__wakeup(), 生命周期结束时，则调用__desturct()。 下面提供一个简单的demo. 123456789101112131415161718192021222324">
+  <meta name="description" content="unserialize和serialize这里不做赘述。 unserialize的漏洞在magic function上，如果一个类定义了__wakup()和__destruct()，则该类的实例被反序列化时，会自动调用__wakeup(), 生命周期结束时，则调用__desturct()。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="php unserialize()&#x2F;wakeup()漏洞">
 <meta property="og:url" content="https://LyleMi.github.io/2016/10/29/2016-10-29-php-unserialize/index.html">
 <meta property="og:site_name" content="Lyle&#39;s Blog">
-<meta property="og:description" content="unserialize和serialize这里不做赘述。 unserialize的漏洞在magic function上，如果一个类定义了__wakup()和__destruct()，则该类的实例被反序列化时，会自动调用__wakeup(), 生命周期结束时，则调用__desturct()。 下面提供一个简单的demo. 123456789101112131415161718192021222324">
+<meta property="og:description" content="unserialize和serialize这里不做赘述。 unserialize的漏洞在magic function上，如果一个类定义了__wakup()和__destruct()，则该类的实例被反序列化时，会自动调用__wakeup(), 生命周期结束时，则调用__desturct()。">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2018-10-29T08:52:07.425Z">
+<meta property="og:updated_time" content="2018-11-27T01:55:45.290Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="php unserialize()&#x2F;wakeup()漏洞">
-<meta name="twitter:description" content="unserialize和serialize这里不做赘述。 unserialize的漏洞在magic function上，如果一个类定义了__wakup()和__destruct()，则该类的实例被反序列化时，会自动调用__wakeup(), 生命周期结束时，则调用__desturct()。 下面提供一个简单的demo. 123456789101112131415161718192021222324">
+<meta name="twitter:description" content="unserialize和serialize这里不做赘述。 unserialize的漏洞在magic function上，如果一个类定义了__wakup()和__destruct()，则该类的实例被反序列化时，会自动调用__wakeup(), 生命周期结束时，则调用__desturct()。">
   
     <link rel="alternative" href="/atom.xml" title="Lyle&#39;s Blog" type="application/atom+xml">
   
@@ -160,6 +160,7 @@
       
         <p>unserialize和serialize这里不做赘述。</p>
 <p>unserialize的漏洞在magic function上，如果一个类定义了__wakup()和__destruct()，则该类的实例被反序列化时，会自动调用__wakeup(), 生命周期结束时，则调用__desturct()。</p>
+<a id="more"></a>
 <p>下面提供一个简单的demo.</p>
 <figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Demo</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> $data;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__construct</span><span class="params">($data)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">$this</span>-&gt;data = $data;</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">"construct&lt;br /&gt;"</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__wakeup</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">"wake up&lt;br /&gt;"</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__destruct</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">"Data's value is $this-&gt;data. &lt;br /&gt;"</span>;</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">"destruct&lt;br /&gt;"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">var_dump(serialize(<span class="keyword">new</span> Demo(<span class="string">"raw value"</span>)));</span><br></pre></td></tr></table></figure>
 <p>输出</p>
