@@ -6,15 +6,19 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://LyleMi.github.io">
-  <title>Category: browser fuzz | Lyle&#39;s Blog</title>
+  <title>基于Gadgets绕过XSS防御机制 | Lyle&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Lyle&#39;s Blog">
-<meta property="og:url" content="https://LyleMi.github.io/categories/browser-fuzz/index.html">
+  <meta name="description" content="这篇文章是之前对CCS 2018 Code-Reuse Attacks for the Web Breaking Cross-Site Scripting Mitigations via Script Gadgets 的阅读笔记，最近整理资料发现放了挺久，于是稍做了一些整理和扩展发了出来。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于Gadgets绕过XSS防御机制">
+<meta property="og:url" content="https://LyleMi.github.io/2019/02/27/bypass-xss-mitigation-via-gadgets/index.html">
 <meta property="og:site_name" content="Lyle&#39;s Blog">
+<meta property="og:description" content="这篇文章是之前对CCS 2018 Code-Reuse Attacks for the Web Breaking Cross-Site Scripting Mitigations via Script Gadgets 的阅读笔记，最近整理资料发现放了挺久，于是稍做了一些整理和扩展发了出来。">
 <meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2019-02-27T01:50:04.720Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Lyle&#39;s Blog">
+<meta name="twitter:title" content="基于Gadgets绕过XSS防御机制">
+<meta name="twitter:description" content="这篇文章是之前对CCS 2018 Code-Reuse Attacks for the Web Breaking Cross-Site Scripting Mitigations via Script Gadgets 的阅读笔记，最近整理资料发现放了挺久，于是稍做了一些整理和扩展发了出来。">
   
     <link rel="alternative" href="/atom.xml" title="Lyle&#39;s Blog" type="application/atom+xml">
   
@@ -134,60 +138,195 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-bypass-xss-mitigation-via-gadgets" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2017" class="archive-year">2017</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/09/27/2017-9-27-domato-dom-fuzzer/" class="archive-article-date">
-  	<time datetime="2017-09-27T01:31:40.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-09-27</time>
-</a>
-        </div>
-    	 
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/09/27/2017-9-27-domato-dom-fuzzer/">Domato - A DOM Fuzzer</a>
+    <h1 class="article-title" itemprop="name">
+      基于Gadgets绕过XSS防御机制
     </h1>
   
 
-        <div class="article-info info-on-right">
-          
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/browser-fuzz//" class="article-tag-list-link color3">browser fuzz</a>
-        		</li>
-      		
-		</ul>
-	</div>
+        
+        <a href="/2019/02/27/bypass-xss-mitigation-via-gadgets/" class="archive-article-date">
+  	<time datetime="2019-02-27T01:49:17.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-02-27</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>这篇文章是之前对CCS 2018 <code>Code-Reuse Attacks for the Web Breaking Cross-Site Scripting Mitigations via Script Gadgets</code> 的阅读笔记，最近整理资料发现放了挺久，于是稍做了一些整理和扩展发了出来。</p>
+<a id="more"></a>
+<h1 id="0x00-背景"><a href="#0x00-背景" class="headerlink" title="0x00 背景"></a>0x00 背景</h1><p>本文主要考虑在可以注入任意HTML代码（富文本编辑器等应用）的条件下，利用JavaScript库中的一些代码片段（Gadget）来绕过常见的XSS防御机制，包括WAF、浏览器的XSS Filter、HTML Sanitizers、Content Security Policy等。</p>
+<p>其中WAF考虑对请求值和返回值进行处理的正则匹配型或者字符匹配型WAF，HTML Sanitizers是则指DOMPurify这种基于DOM解析的XSS过滤器，Content Security Policy则主要考虑启用<code>unsafe-eval</code>或<code>strict-dynamic</code>的情况。</p>
+<h1 id="0x01-简单例子"><a href="#0x01-简单例子" class="headerlink" title="0x01 简单例子"></a>0x01 简单例子</h1><p>和二进制攻击中的Gadget作用类似，本文中的Gadget是指可能被恶意利用的代码片段，下面以一个简单的例子来说明：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> button = <span class="built_in">document</span>.getElementById(<span class="string">"mbutton"</span>);</span><br><span class="line">button.innerHTML = button.getAttribute(<span class="string">"data-text"</span>);</span><br></pre></td></tr></table></figure>
+<p>在这段代码中，取出了Id为<code>mbutton</code>的元素，并将data-text的值赋到了该元素的innerHTML属性。这是一些库中为了实现类似Tooltip等效果常用的一种方式，但是在存在这种代码片段的时候，只要构造如下的元素，就可造成XSS攻击。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">button</span> <span class="attr">id</span>=<span class="string">"mbutton"</span> <span class="attr">data-text</span>=<span class="string">"&lt;img src=x onerror=alert(/xss/)&gt;"</span>&gt;</span>a<span class="tag">&lt;/<span class="name">button</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h1 id="0x02-Gadget分类"><a href="#0x02-Gadget分类" class="headerlink" title="0x02 Gadget分类"></a>0x02 Gadget分类</h1><p>论文中把可利用的Gadget分为几类，具体如下：</p>
+<h2 id="字符串操作"><a href="#字符串操作" class="headerlink" title="字符串操作"></a>字符串操作</h2><p>这种Gadget主要是指对字符串的操作，一个字符串在经过操作后可能变为造成攻击的字符。</p>
+<p>例如Polymer中的一段代码<code>dash.replace(/-[a-z]/g, (m) =&gt; m[1].toUpperCase())</code>，这段代码会把以连字符构成的字符串变为大写，例如像<code>inner-h-t-m-l</code>这种字符串处理后会变成<code>innerHTML</code>。大部分WAF是对请求值和返回值做匹配，而此时传入的是<code>inner-h-t-m-l</code>而不是<code>innerHTML</code>，那么就有可能造成绕过。</p>
+<h2 id="元素创建"><a href="#元素创建" class="headerlink" title="元素创建"></a>元素创建</h2><p>这种Gadget是像<code>document.createElement(input)</code> <code>document.createElement(&quot;script&quot;)</code> <code>jQuery(&quot;&lt;&quot; + tag + &quot;&gt;&quot;)</code> <code>jQuery.html(input)</code> 这种直接创建的标签甚至script的代码片段。当输入一定程度可控时，则可利用这种Gadget。</p>
+<h2 id="函数创建"><a href="#函数创建" class="headerlink" title="函数创建"></a>函数创建</h2><p>这种Gadget是指创建函数的代码段，比如Underscore.js中发现的一段代码：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">source = <span class="string">"var __t,__p='',__j=Array.prototype.join,"</span> +</span><br><span class="line"><span class="string">"print=function()&#123;__p+=__j.call(arguments,'');&#125;;\n"</span> +</span><br><span class="line">source + <span class="string">'return __p;\n'</span>;</span><br><span class="line"><span class="keyword">var</span> render = <span class="keyword">new</span> <span class="built_in">Function</span>(</span><br><span class="line">settings.variable || <span class="string">'obj'</span>, <span class="string">'_'</span>, source);</span><br></pre></td></tr></table></figure>
+<p>这种Gadget会间接执行构造的代码段，在一定条件下可造成攻击。</p>
+<h2 id="JavaScript代码执行"><a href="#JavaScript代码执行" class="headerlink" title="JavaScript代码执行"></a>JavaScript代码执行</h2><p>这种Gadget主要是指类似<code>eval</code>这种会直接执行传入代码的代码段，例如：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">eval</span>(input);</span><br><span class="line">inputFunction.apply();</span><br><span class="line">node.innerHTML = <span class="string">"prefix"</span> + input + <span class="string">"suffix"</span>;</span><br><span class="line">scriptElement.src = input;</span><br><span class="line">node.appendChild(input);</span><br></pre></td></tr></table></figure>
+<h2 id="表达式解析"><a href="#表达式解析" class="headerlink" title="表达式解析"></a>表达式解析</h2><p>很多前端框架都提供了自己的模版引擎，有着丰富而强大的功能，这种Gadget就是框架中对模版表达式解析执行而造成的问题。例如Aurelia框架中可以用下面这段代码来触发一个代码执行。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;div ref=me</span><br><span class="line">s.bind=&quot;$this.me.ownerDocument.defaultView.alert(1)&quot;</span><br><span class="line">&gt;&lt;/div&gt;</span><br></pre></td></tr></table></figure>
+<h1 id="0x03-例子"><a href="#0x03-例子" class="headerlink" title="0x03 例子"></a>0x03 例子</h1><h2 id="例一"><a href="#例一" class="headerlink" title="例一"></a>例一</h2><p>论文中提及的例子很多，本文选取其中一个在jQuery Mobile中的Gadget来介绍：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (myId) &#123;</span><br><span class="line">    ui.screen.attr(<span class="string">"id"</span>, myId + <span class="string">"-screen"</span>);</span><br><span class="line">    ui.container.attr(<span class="string">"id"</span>, myId + <span class="string">"-popup"</span>);</span><br><span class="line">    ui.placeholder</span><br><span class="line">        .attr(<span class="string">"id"</span>, myId + <span class="string">"-placeholder"</span>)</span><br><span class="line">        .html(<span class="string">"&lt;!-- placeholder for "</span> + myId + <span class="string">" --&gt;"</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个Gadget会提取<code>data-role</code>为<code>popup</code>的元素，获取其<code>id</code>中的内容，并调用<code>.html</code>，那么就可以构造一个如下的PoC：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">data-role</span>=<span class="string">popup</span> <span class="attr">id</span>=<span class="string">'--&gt;</span></span></span><br><span class="line"><span class="tag"><span class="string">&amp;lt;script&amp;gt;alert(1)&amp;lt;/script&amp;gt;'</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>在这个PoC中，没有<code>&lt;script&gt;</code>这种会触发WAF的字符串，用到的属性也是<code>data-role</code> <code>id</code>等在HTML Sanitizer白名单中的元素，因此该PoC可以绕过大部分的防御手段。</p>
+<h2 id="例二"><a href="#例二" class="headerlink" title="例二"></a>例二</h2><p>虽然文中主要是针对<code>unsafe-eval</code>或<code>strict-dynamic</code>两种情况作了CSP的绕过，但是在有的情况下，不开启这两个选项也可实现执行，例如下面这个PoC：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">http-equiv</span>=<span class="string">content-security-policy</span> <span class="attr">content</span>=<span class="string">"object-src 'none';script-src https://ajax.googleapis.com/ajax/libs/angularjs/1.6.1/angular.min.js;"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"https://ajax.googleapis.com/ajax/libs/angularjs/1.6.1/angular.min.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">     <span class="tag">&lt;<span class="name">div</span> <span class="attr">ng-app</span> <span class="attr">ng-csp</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">div</span> <span class="attr">ng-focus</span>=<span class="string">"x=$event"</span> <span class="attr">tabindex</span>=<span class="string">0</span>&gt;</span>foo<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">div</span> <span class="attr">ng-repeat</span>=<span class="string">"(key, value) in x.view"</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">ng-if</span>=<span class="string">key</span>==<span class="string">"window"</span>&gt;</span>&#123;&#123; value.alert = [1].reduce(value.alert, 'xss') &#125;&#125;<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>在模版内部中，Angular利用的是下面这个函数来完成调用，并不涉及<code>eval</code>等函数，因此在CSP没有开启<code>unsafe-eval</code>或<code>strict-dynamic</code>的情况下也可实现代码执行。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">function defaultHandlerWrapper(element, event, handler) &#123;</span><br><span class="line">  handler.call(element, event);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="0x04-Gadget发现"><a href="#0x04-Gadget发现" class="headerlink" title="0x04 Gadget发现"></a>0x04 Gadget发现</h1><p>对Gadget的查找，作者给出了两种方式，一种是手工查找，一种是基于污点分析的半自动化查找。手工查找本文不做赘述，主要讲基于污点分析的半自动化查找方式。</p>
+<p>这种方式是基于2013年CCS的一篇名为<code>25 Million Flows Later - Large-scale
+Detection of DOM-based XSS</code>的文章。</p>
+<p>该方式基于浏览器完成，先对<code>eval</code> <code>document.write</code>等敏感调用和<code>innerHTML</code>做了污点跟踪。然后爬取Alex Top 5000的网站，当发现数据流入了这些敏感调用，就尝试使用预置的一些攻击载荷尝试利用，若利用成功，则找到了一个Gadget。</p>
+<p>当然这种方式也存在一些限制，比如作者只对第一级的链接做了分析和尝试、没有做用户交互和验证、在验证的时候没有考虑防御机制的绕过等。</p>
+<h1 id="0x05-参考链接"><a href="#0x05-参考链接" class="headerlink" title="0x05 参考链接"></a>0x05 参考链接</h1><ul>
+<li><a href="https://github.com/cure53/DOMPurify" target="_blank" rel="noopener">https://github.com/cure53/DOMPurify</a></li>
+<li><a href="https://github.com/google/security-research-pocs/tree/master/script-gadgets" target="_blank" rel="noopener">https://github.com/google/security-research-pocs/tree/master/script-gadgets</a></li>
+<li><a href="https://queue.acm.org/detail.cfm?id=2663760" target="_blank" rel="noopener">https://queue.acm.org/detail.cfm?id=2663760</a></li>
+<li><a href="https://security.googleblog.com/2009/03/reducing-xss-by-way-of-automatic.html" target="_blank" rel="noopener">https://security.googleblog.com/2009/03/reducing-xss-by-way-of-automatic.html</a></li>
+<li><a href="https://www.blackhat.com/docs/us-17/thursday/us-17-Lekies-Dont-Trust-The-DOM-Bypassing-XSS-Mitigations-Via-Script-Gadgets.pdf" target="_blank" rel="noopener">https://www.blackhat.com/docs/us-17/thursday/us-17-Lekies-Dont-Trust-The-DOM-Bypassing-XSS-Mitigations-Via-Script-Gadgets.pdf</a></li>
+</ul>
 
+      
 
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+      
+
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
+        </div>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=https://LyleMi.github.io/2019/02/27/bypass-xss-mitigation-via-gadgets/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
+  
+<nav id="article-nav">
   
   
-    </div></section>
+    <a href="/2018/12/08/idnfuzz/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">IDN Spoof漏洞自动化挖掘</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+  
+  
   
 
-    
+  
+
+  
+
+  
 
 
           </div>
@@ -210,10 +349,10 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
+		isPost: true,
 		isArchive: false,
 		isTag: false,
-		isCategory: true,
+		isCategory: false,
 		open_in_new: false,
 		toc_hide_index: true,
 		root: "/",
