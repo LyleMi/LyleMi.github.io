@@ -6,19 +6,19 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://LyleMi.github.io">
-  <title>基于Gadgets绕过XSS防御机制 | Lyle&#39;s Blog</title>
+  <title>Web应用代码自动化审计浅谈 | Lyle&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="这篇文章是之前对CCS 2018 Code-Reuse Attacks for the Web Breaking Cross-Site Scripting Mitigations via Script Gadgets 的阅读笔记，最近整理资料发现放了挺久，于是稍做了一些整理和扩展发了出来。">
+  <meta name="description" content="0. 序代码审计是找到应用缺陷的过程。自动化审计通常有白盒、黑盒、灰盒等多种方式。白盒指通过对源代码的分析找到应用缺陷；黑盒通常不涉及到源代码，多使用模糊测试等方式来找到漏洞；而灰盒则是黑白结合的方式，利用黑盒特性来减少白盒的计算复杂度，使用白盒的信息来衡量漏洞的有效性。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="基于Gadgets绕过XSS防御机制">
-<meta property="og:url" content="https://LyleMi.github.io/2019/02/27/bypass-xss-mitigation-via-gadgets/index.html">
+<meta property="og:title" content="Web应用代码自动化审计浅谈">
+<meta property="og:url" content="https://LyleMi.github.io/2019/04/06/Web-Application-Auto-Audit/index.html">
 <meta property="og:site_name" content="Lyle&#39;s Blog">
-<meta property="og:description" content="这篇文章是之前对CCS 2018 Code-Reuse Attacks for the Web Breaking Cross-Site Scripting Mitigations via Script Gadgets 的阅读笔记，最近整理资料发现放了挺久，于是稍做了一些整理和扩展发了出来。">
+<meta property="og:description" content="0. 序代码审计是找到应用缺陷的过程。自动化审计通常有白盒、黑盒、灰盒等多种方式。白盒指通过对源代码的分析找到应用缺陷；黑盒通常不涉及到源代码，多使用模糊测试等方式来找到漏洞；而灰盒则是黑白结合的方式，利用黑盒特性来减少白盒的计算复杂度，使用白盒的信息来衡量漏洞的有效性。">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2019-02-27T01:50:04.720Z">
+<meta property="og:updated_time" content="2019-04-06T10:18:10.735Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="基于Gadgets绕过XSS防御机制">
-<meta name="twitter:description" content="这篇文章是之前对CCS 2018 Code-Reuse Attacks for the Web Breaking Cross-Site Scripting Mitigations via Script Gadgets 的阅读笔记，最近整理资料发现放了挺久，于是稍做了一些整理和扩展发了出来。">
+<meta name="twitter:title" content="Web应用代码自动化审计浅谈">
+<meta name="twitter:description" content="0. 序代码审计是找到应用缺陷的过程。自动化审计通常有白盒、黑盒、灰盒等多种方式。白盒指通过对源代码的分析找到应用缺陷；黑盒通常不涉及到源代码，多使用模糊测试等方式来找到漏洞；而灰盒则是黑白结合的方式，利用黑盒特性来减少白盒的计算复杂度，使用白盒的信息来衡量漏洞的有效性。">
   
     <link rel="alternative" href="/atom.xml" title="Lyle&#39;s Blog" type="application/atom+xml">
   
@@ -138,66 +138,62 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            <article id="post-bypass-xss-mitigation-via-gadgets" class="article article-type-post " itemscope itemprop="blogPost">
+            <article id="post-Web-Application-Auto-Audit" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 class="article-title" itemprop="name">
-      基于Gadgets绕过XSS防御机制
+      Web应用代码自动化审计浅谈
     </h1>
   
 
         
-        <a href="/2019/02/27/bypass-xss-mitigation-via-gadgets/" class="archive-article-date">
-  	<time datetime="2019-02-27T01:49:17.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-02-27</time>
+        <a href="/2019/04/06/Web-Application-Auto-Audit/" class="archive-article-date">
+  	<time datetime="2019-04-06T10:17:22.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-04-06</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>这篇文章是之前对CCS 2018 <code>Code-Reuse Attacks for the Web Breaking Cross-Site Scripting Mitigations via Script Gadgets</code> 的阅读笔记，最近整理资料发现放了挺久，于是稍做了一些整理和扩展发了出来。</p>
+        <h1 id="0-序"><a href="#0-序" class="headerlink" title="0. 序"></a>0. 序</h1><p>代码审计是找到应用缺陷的过程。自动化审计通常有白盒、黑盒、灰盒等多种方式。白盒指通过对源代码的分析找到应用缺陷；黑盒通常不涉及到源代码，多使用模糊测试等方式来找到漏洞；而灰盒则是黑白结合的方式，利用黑盒特性来减少白盒的计算复杂度，使用白盒的信息来衡量漏洞的有效性。</p>
 <a id="more"></a>
-<h1 id="0x00-背景"><a href="#0x00-背景" class="headerlink" title="0x00 背景"></a>0x00 背景</h1><p>本文主要考虑在可以注入任意HTML代码（富文本编辑器等应用）的条件下，利用JavaScript库中的一些代码片段（Gadget）来绕过常见的XSS防御机制，包括WAF、浏览器的XSS Filter、HTML Sanitizers、Content Security Policy等。</p>
-<p>其中WAF考虑对请求值和返回值进行处理的正则匹配型或者字符匹配型WAF，HTML Sanitizers是则指DOMPurify这种基于DOM解析的XSS过滤器，Content Security Policy则主要考虑启用<code>unsafe-eval</code>或<code>strict-dynamic</code>的情况。</p>
-<h1 id="0x01-简单例子"><a href="#0x01-简单例子" class="headerlink" title="0x01 简单例子"></a>0x01 简单例子</h1><p>和二进制攻击中的Gadget作用类似，本文中的Gadget是指可能被恶意利用的代码片段，下面以一个简单的例子来说明：</p>
-<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> button = <span class="built_in">document</span>.getElementById(<span class="string">"mbutton"</span>);</span><br><span class="line">button.innerHTML = button.getAttribute(<span class="string">"data-text"</span>);</span><br></pre></td></tr></table></figure>
-<p>在这段代码中，取出了Id为<code>mbutton</code>的元素，并将data-text的值赋到了该元素的innerHTML属性。这是一些库中为了实现类似Tooltip等效果常用的一种方式，但是在存在这种代码片段的时候，只要构造如下的元素，就可造成XSS攻击。</p>
-<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">button</span> <span class="attr">id</span>=<span class="string">"mbutton"</span> <span class="attr">data-text</span>=<span class="string">"&lt;img src=x onerror=alert(/xss/)&gt;"</span>&gt;</span>a<span class="tag">&lt;/<span class="name">button</span>&gt;</span></span><br></pre></td></tr></table></figure>
-<h1 id="0x02-Gadget分类"><a href="#0x02-Gadget分类" class="headerlink" title="0x02 Gadget分类"></a>0x02 Gadget分类</h1><p>论文中把可利用的Gadget分为几类，具体如下：</p>
-<h2 id="字符串操作"><a href="#字符串操作" class="headerlink" title="字符串操作"></a>字符串操作</h2><p>这种Gadget主要是指对字符串的操作，一个字符串在经过操作后可能变为造成攻击的字符。</p>
-<p>例如Polymer中的一段代码<code>dash.replace(/-[a-z]/g, (m) =&gt; m[1].toUpperCase())</code>，这段代码会把以连字符构成的字符串变为大写，例如像<code>inner-h-t-m-l</code>这种字符串处理后会变成<code>innerHTML</code>。大部分WAF是对请求值和返回值做匹配，而此时传入的是<code>inner-h-t-m-l</code>而不是<code>innerHTML</code>，那么就有可能造成绕过。</p>
-<h2 id="元素创建"><a href="#元素创建" class="headerlink" title="元素创建"></a>元素创建</h2><p>这种Gadget是像<code>document.createElement(input)</code> <code>document.createElement(&quot;script&quot;)</code> <code>jQuery(&quot;&lt;&quot; + tag + &quot;&gt;&quot;)</code> <code>jQuery.html(input)</code> 这种直接创建的标签甚至script的代码片段。当输入一定程度可控时，则可利用这种Gadget。</p>
-<h2 id="函数创建"><a href="#函数创建" class="headerlink" title="函数创建"></a>函数创建</h2><p>这种Gadget是指创建函数的代码段，比如Underscore.js中发现的一段代码：</p>
-<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">source = <span class="string">"var __t,__p='',__j=Array.prototype.join,"</span> +</span><br><span class="line"><span class="string">"print=function()&#123;__p+=__j.call(arguments,'');&#125;;\n"</span> +</span><br><span class="line">source + <span class="string">'return __p;\n'</span>;</span><br><span class="line"><span class="keyword">var</span> render = <span class="keyword">new</span> <span class="built_in">Function</span>(</span><br><span class="line">settings.variable || <span class="string">'obj'</span>, <span class="string">'_'</span>, source);</span><br></pre></td></tr></table></figure>
-<p>这种Gadget会间接执行构造的代码段，在一定条件下可造成攻击。</p>
-<h2 id="JavaScript代码执行"><a href="#JavaScript代码执行" class="headerlink" title="JavaScript代码执行"></a>JavaScript代码执行</h2><p>这种Gadget主要是指类似<code>eval</code>这种会直接执行传入代码的代码段，例如：</p>
-<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">eval</span>(input);</span><br><span class="line">inputFunction.apply();</span><br><span class="line">node.innerHTML = <span class="string">"prefix"</span> + input + <span class="string">"suffix"</span>;</span><br><span class="line">scriptElement.src = input;</span><br><span class="line">node.appendChild(input);</span><br></pre></td></tr></table></figure>
-<h2 id="表达式解析"><a href="#表达式解析" class="headerlink" title="表达式解析"></a>表达式解析</h2><p>很多前端框架都提供了自己的模版引擎，有着丰富而强大的功能，这种Gadget就是框架中对模版表达式解析执行而造成的问题。例如Aurelia框架中可以用下面这段代码来触发一个代码执行。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;div ref=me</span><br><span class="line">s.bind=&quot;$this.me.ownerDocument.defaultView.alert(1)&quot;</span><br><span class="line">&gt;&lt;/div&gt;</span><br></pre></td></tr></table></figure>
-<h1 id="0x03-例子"><a href="#0x03-例子" class="headerlink" title="0x03 例子"></a>0x03 例子</h1><h2 id="例一"><a href="#例一" class="headerlink" title="例一"></a>例一</h2><p>论文中提及的例子很多，本文选取其中一个在jQuery Mobile中的Gadget来介绍：</p>
-<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (myId) &#123;</span><br><span class="line">    ui.screen.attr(<span class="string">"id"</span>, myId + <span class="string">"-screen"</span>);</span><br><span class="line">    ui.container.attr(<span class="string">"id"</span>, myId + <span class="string">"-popup"</span>);</span><br><span class="line">    ui.placeholder</span><br><span class="line">        .attr(<span class="string">"id"</span>, myId + <span class="string">"-placeholder"</span>)</span><br><span class="line">        .html(<span class="string">"&lt;!-- placeholder for "</span> + myId + <span class="string">" --&gt;"</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>这个Gadget会提取<code>data-role</code>为<code>popup</code>的元素，获取其<code>id</code>中的内容，并调用<code>.html</code>，那么就可以构造一个如下的PoC：</p>
-<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">data-role</span>=<span class="string">popup</span> <span class="attr">id</span>=<span class="string">'--&gt;</span></span></span><br><span class="line"><span class="tag"><span class="string">&amp;lt;script&amp;gt;alert(1)&amp;lt;/script&amp;gt;'</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></table></figure>
-<p>在这个PoC中，没有<code>&lt;script&gt;</code>这种会触发WAF的字符串，用到的属性也是<code>data-role</code> <code>id</code>等在HTML Sanitizer白名单中的元素，因此该PoC可以绕过大部分的防御手段。</p>
-<h2 id="例二"><a href="#例二" class="headerlink" title="例二"></a>例二</h2><p>虽然文中主要是针对<code>unsafe-eval</code>或<code>strict-dynamic</code>两种情况作了CSP的绕过，但是在有的情况下，不开启这两个选项也可实现执行，例如下面这个PoC：</p>
-<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">http-equiv</span>=<span class="string">content-security-policy</span> <span class="attr">content</span>=<span class="string">"object-src 'none';script-src https://ajax.googleapis.com/ajax/libs/angularjs/1.6.1/angular.min.js;"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"https://ajax.googleapis.com/ajax/libs/angularjs/1.6.1/angular.min.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">     <span class="tag">&lt;<span class="name">div</span> <span class="attr">ng-app</span> <span class="attr">ng-csp</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">div</span> <span class="attr">ng-focus</span>=<span class="string">"x=$event"</span> <span class="attr">tabindex</span>=<span class="string">0</span>&gt;</span>foo<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">div</span> <span class="attr">ng-repeat</span>=<span class="string">"(key, value) in x.view"</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">ng-if</span>=<span class="string">key</span>==<span class="string">"window"</span>&gt;</span>&#123;&#123; value.alert = [1].reduce(value.alert, 'xss') &#125;&#125;<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
-<p>在模版内部中，Angular利用的是下面这个函数来完成调用，并不涉及<code>eval</code>等函数，因此在CSP没有开启<code>unsafe-eval</code>或<code>strict-dynamic</code>的情况下也可实现代码执行。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">function defaultHandlerWrapper(element, event, handler) &#123;</span><br><span class="line">  handler.call(element, event);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h1 id="0x04-Gadget发现"><a href="#0x04-Gadget发现" class="headerlink" title="0x04 Gadget发现"></a>0x04 Gadget发现</h1><p>对Gadget的查找，作者给出了两种方式，一种是手工查找，一种是基于污点分析的半自动化查找。手工查找本文不做赘述，主要讲基于污点分析的半自动化查找方式。</p>
-<p>这种方式是基于2013年CCS的一篇名为<code>25 Million Flows Later - Large-scale
-Detection of DOM-based XSS</code>的文章。</p>
-<p>该方式基于浏览器完成，先对<code>eval</code> <code>document.write</code>等敏感调用和<code>innerHTML</code>做了污点跟踪。然后爬取Alex Top 5000的网站，当发现数据流入了这些敏感调用，就尝试使用预置的一些攻击载荷尝试利用，若利用成功，则找到了一个Gadget。</p>
-<p>当然这种方式也存在一些限制，比如作者只对第一级的链接做了分析和尝试、没有做用户交互和验证、在验证的时候没有考虑防御机制的绕过等。</p>
-<h1 id="0x05-参考链接"><a href="#0x05-参考链接" class="headerlink" title="0x05 参考链接"></a>0x05 参考链接</h1><ul>
-<li><a href="https://github.com/cure53/DOMPurify" target="_blank" rel="noopener">https://github.com/cure53/DOMPurify</a></li>
-<li><a href="https://github.com/google/security-research-pocs/tree/master/script-gadgets" target="_blank" rel="noopener">https://github.com/google/security-research-pocs/tree/master/script-gadgets</a></li>
-<li><a href="https://queue.acm.org/detail.cfm?id=2663760" target="_blank" rel="noopener">https://queue.acm.org/detail.cfm?id=2663760</a></li>
-<li><a href="https://security.googleblog.com/2009/03/reducing-xss-by-way-of-automatic.html" target="_blank" rel="noopener">https://security.googleblog.com/2009/03/reducing-xss-by-way-of-automatic.html</a></li>
-<li><a href="https://www.blackhat.com/docs/us-17/thursday/us-17-Lekies-Dont-Trust-The-DOM-Bypassing-XSS-Mitigations-Via-Script-Gadgets.pdf" target="_blank" rel="noopener">https://www.blackhat.com/docs/us-17/thursday/us-17-Lekies-Dont-Trust-The-DOM-Bypassing-XSS-Mitigations-Via-Script-Gadgets.pdf</a></li>
+<h1 id="1-基础概念"><a href="#1-基础概念" class="headerlink" title="1. 基础概念"></a>1. 基础概念</h1><h2 id="1-1-输入-Source"><a href="#1-1-输入-Source" class="headerlink" title="1.1 输入 (Source)"></a>1.1 输入 (Source)</h2><p>Web应用的输入，可以是请求的参数（GET、POST等）、上传的文件、Cookie、数据库数据等用户可控或者间接可控的地方。</p>
+<p>例如PHP中的 <code>$_GET</code> / <code>$_POST</code> / <code>$_REQUEST</code> / <code>$_COOKIE</code> / <code>$_FILES</code>  / <code>$_SERVER</code> 等，都可以作为应用的输入。</p>
+<h2 id="1-2-处理函数-Filter"><a href="#1-2-处理函数-Filter" class="headerlink" title="1.2 处理函数 (Filter)"></a>1.2 处理函数 (Filter)</h2><p>处理函数是对数据进行过滤或者编解码的函数。这些函数会对输入造成影响，为漏洞利用带来不确定性。</p>
+<p>同样以PHP为例，这样的函数可能是 <code>mysqli_real_escape_string</code> / <code>htmlspecialchars</code> / <code>base64_encode</code> / <code>str_rot13</code> 等，也可能是应用自定义的过滤函数。</p>
+<h2 id="1-3-危险函数-Sink"><a href="#1-3-危险函数-Sink" class="headerlink" title="1.3 危险函数 (Sink)"></a>1.3 危险函数 (Sink)</h2><p>危险函数又常叫做Sink Call、漏洞点，是可能触发危险行为如文件操作、命令执行、数据库操作等行为的函数。</p>
+<p>在PHP中，可能是 <code>include</code> / <code>system</code> / <code>echo</code> 等。</p>
+<h2 id="1-4-问题定义"><a href="#1-4-问题定义" class="headerlink" title="1.4 问题定义"></a>1.4 问题定义</h2><p>一般认为一个漏洞的触发过程是从输入经过过滤到危险函数的过程(Source To Sink)，而自动化审计就是寻找这个链条的过程。自动化审计的难点主要在于以下几个方面。</p>
+<h3 id="1-4-1-输入多样化"><a href="#1-4-1-输入多样化" class="headerlink" title="1.4.1 输入多样化"></a>1.4.1 输入多样化</h3><p>对Web应用来说，可能的输入可以来自GET/POST的参数、Cookie、Url等多个地方，这些输入格式不固定，输入空间很大。</p>
+<h3 id="1-4-2-过滤函数复杂"><a href="#1-4-2-过滤函数复杂" class="headerlink" title="1.4.2 过滤函数复杂"></a>1.4.2 过滤函数复杂</h3><p>在审计的过程中，从输入没有经过任何过滤函数就到达危险函数的过程较少。但是自动化判断一些过滤数是否可以绕过较为困难。</p>
+<h3 id="1-4-3-代码本身的复杂度"><a href="#1-4-3-代码本身的复杂度" class="headerlink" title="1.4.3 代码本身的复杂度"></a>1.4.3 代码本身的复杂度</h3><p>现代Web框架，代码复杂度极高，有相当多的动态加载和调用的过程，为自动化分析带来了困难。</p>
+<h1 id="2-技术基础"><a href="#2-技术基础" class="headerlink" title="2. 技术基础"></a>2. 技术基础</h1><h2 id="2-1-抽象语法树"><a href="#2-1-抽象语法树" class="headerlink" title="2.1 抽象语法树"></a>2.1 抽象语法树</h2><p>抽象语法树，顾名思义，是一种树形的数据结构。构造AST树的基本方法是将表达式的操作数作为树结构的叶子，将表达式的操作符号作为树结构的根，依次循环迭代进行构造。</p>
+<p>例如在JavaScript中， <code>a=1</code> 的抽象语法树如下：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="string">"type"</span>: <span class="string">"Program"</span>,</span><br><span class="line">    <span class="string">"body"</span>: [</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="string">"type"</span>: <span class="string">"ExpressionStatement"</span>,</span><br><span class="line">        <span class="string">"expression"</span>:</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="string">"type"</span>: <span class="string">"AssignmentExpression"</span>,</span><br><span class="line">            <span class="string">"operator"</span>: <span class="string">"="</span>,</span><br><span class="line">            <span class="string">"left"</span>:</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="string">"type"</span>: <span class="string">"Identifier"</span>,</span><br><span class="line">                <span class="string">"name"</span>: <span class="string">"a"</span></span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="string">"right"</span>:</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="string">"type"</span>: <span class="string">"Literal"</span>,</span><br><span class="line">                <span class="string">"value"</span>: <span class="number">1</span>,</span><br><span class="line">                <span class="string">"raw"</span>: <span class="string">"1"</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;],</span><br><span class="line">    <span class="string">"sourceType"</span>: <span class="string">"script"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="2-2-程序控制流图"><a href="#2-2-程序控制流图" class="headerlink" title="2.2 程序控制流图"></a>2.2 程序控制流图</h2><p>AST树依旧是比较高层次的形式，其中模块之间的调用、循环等依旧不利于数据流的处理，因此引入了更底层的程序控制流图来进行分析。</p>
+<p>程序控制流图(Control Flow Graph，CFG)是静态分析过程中的另一种状态，可以反映程序代码控制流程。其实，程序控制流图是由一个入口、若干个出口组成的有向图，图中的每一个节点代表一个基本块，基本块中可以有一系列顺序执行的语句；图中的有向边，代表从出发节点到目标节点的控制依赖关系。</p>
+<h1 id="3-解决方案"><a href="#3-解决方案" class="headerlink" title="3. 解决方案"></a>3. 解决方案</h1><h2 id="3-1-危险函数匹配"><a href="#3-1-危险函数匹配" class="headerlink" title="3.1 危险函数匹配"></a>3.1 危险函数匹配</h2><p>白盒审计最常见的方式是通过查找危险函数来定位漏洞，比较有代表性的工具是Seay开发的审计工具。这个工具直接找出所有危险函数的位置，这种方式没有对调用流程进行深入分析，相对误报率会比较高。</p>
+<p>不过同样的，这种方式在一些环境下能做到几乎无漏报，只要审计者有耐心，可以发现应用大部分的漏洞，但是在高度框架化的代码中，这种方式能找到的漏洞相对有限。</p>
+<h2 id="3-2-代码相似性比对"><a href="#3-2-代码相似性比对" class="headerlink" title="3.2 代码相似性比对"></a>3.2 代码相似性比对</h2><p>一些开发者会复制其他框架的代码，或者使用各种框架。如果事先有建立对应的漏洞图谱，则可使用相似性方法来找到漏洞。</p>
+<h2 id="3-3-控制流分析"><a href="#3-3-控制流分析" class="headerlink" title="3.3 控制流分析"></a>3.3 控制流分析</h2><p>在2012年，Dahse J等人设计了RIPS，该工具引入AST进行数据流与控制流分析，结合过程内与过程间的分析得到审计结果，相对危险函数匹配的方式来说误报率少了很多，但是同样的也增加了开销。RIPS初始的版本开放源代码，而后闭源进行商业化。</p>
+<h2 id="3-4-基于图的分析"><a href="#3-4-基于图的分析" class="headerlink" title="3.4 基于图的分析"></a>3.4 基于图的分析</h2><p>基于图的分析是对控制流分析的一个改进，其利用CFG的特性和图计算的算法，一定程度上简化了计算，比较有代表性的是微软的Semmle QL和NDSS 2017年发表的文章Efficient and Flexible Discovery of PHP Application Vulnerabilities。</p>
+<h2 id="3-5-灰盒分析"><a href="#3-5-灰盒分析" class="headerlink" title="3.5 灰盒分析"></a>3.5 灰盒分析</h2><p>基于控制流的分析开销较大，于是有人提出了基于运行时的分析方式，对代码进行Hook，当执行到危险函数时自动回溯输入，找到输入并判断是否可用。</p>
+<p>这种方式解决了控制流分析实现复杂、计算路径开销大的问题，在判断过滤函数上也有一定的突破，但是灰盒的方式并不一定会触发所有的漏洞。fate0师傅开发的prvd就是基于这种设计思路。</p>
+<h1 id="4-参考资料"><a href="#4-参考资料" class="headerlink" title="4. 参考资料"></a>4. 参考资料</h1><ul>
+<li>[1] RIPS <a href="https://github.com/ripsscanner/rips" target="_blank" rel="noopener">https://github.com/ripsscanner/rips</a></li>
+<li>[2] prvd <a href="https://github.com/fate0/prvd" target="_blank" rel="noopener">https://github.com/fate0/prvd</a></li>
+<li>[3] PHP运行时漏洞检测 <a href="http://blog.fatezero.org/2018/11/11/prvd/" target="_blank" rel="noopener">http://blog.fatezero.org/2018/11/11/prvd/</a></li>
+<li>[4] Cobra <a href="https://github.com/FeeiCN/cobra" target="_blank" rel="noopener">https://github.com/FeeiCN/cobra</a></li>
+<li>[5] Semmle QL <a href="https://github.com/Semmle/ql" target="_blank" rel="noopener">https://github.com/Semmle/ql</a></li>
+<li>[6] Vulnerability hunting with Semmle QL <a href="https://blogs.technet.microsoft.com/srd/2018/08/16/vulnerability-hunting-with-semmle-ql-part-1/" target="_blank" rel="noopener">https://blogs.technet.microsoft.com/srd/2018/08/16/vulnerability-hunting-with-semmle-ql-part-1/</a></li>
+<li>[7] Backes M , Rieck K , Skoruppa M , et al. Efficient and Flexible Discovery of PHP Application Vulnerabilities[C]// IEEE European Symposium on Security &amp; Privacy. IEEE, 2017.</li>
+<li>[8] Dahse J. RIPS-A static source code analyser for vulnerabilities in PHP scripts[J]. Retrieved: February, 2010, 28: 2012.</li>
+<li>[9] awesome static analysis <a href="https://github.com/mre/awesome-static-analysis" target="_blank" rel="noopener">https://github.com/mre/awesome-static-analysis</a></li>
 </ul>
+<h1 id="5-结语"><a href="#5-结语" class="headerlink" title="5. 结语"></a>5. 结语</h1><p>在学习自动化审计的过程中做了一点整理，于是形成了这篇文章，水平有限，这篇文章讲得也比较浅。之后有机会再就各个技术的细节做进一步分析，不当之处还请各位师傅不吝指出。</p>
 
       
 
@@ -277,7 +273,7 @@ Detection of DOM-based XSS</code>的文章。</p>
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//pan.baidu.com/share/qrcode?url=https://LyleMi.github.io/2019/02/27/bypass-xss-mitigation-via-gadgets/" alt="微信分享二维码">
+      <img src="//pan.baidu.com/share/qrcode?url=https://LyleMi.github.io/2019/04/06/Web-Application-Auto-Audit/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -291,18 +287,9 @@ Detection of DOM-based XSS</code>的文章。</p>
   
 <nav id="article-nav">
   
-    <a href="/2019/04/06/Web-Application-Auto-Audit/" id="article-nav-newer" class="article-nav-link-wrap">
-      <i class="icon-circle-left"></i>
-      <div class="article-nav-title">
-        
-          Web应用代码自动化审计浅谈
-        
-      </div>
-    </a>
   
-  
-    <a href="/2018/12/08/idnfuzz/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">IDN Spoof漏洞自动化挖掘</div>
+    <a href="/2019/02/27/bypass-xss-mitigation-via-gadgets/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">基于Gadgets绕过XSS防御机制</div>
       <i class="icon-circle-right"></i>
     </a>
   
