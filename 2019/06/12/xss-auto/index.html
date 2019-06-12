@@ -6,15 +6,20 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://LyleMi.github.io">
-  <title>Archives: 2019 | Lyle&#39;s Blog</title>
+  <title>基于污点分析的XSS漏洞辅助挖掘的一种方式 | Lyle&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Lyle&#39;s Blog">
-<meta property="og:url" content="https://LyleMi.github.io/archives/2019/index.html">
+  <meta name="description" content="序我在之前的一篇文章中简单讲解了Web应用代码自动化审计的几种实现方式。 这篇文章以自动化辅助挖掘XSS漏洞漏洞为例，简单的讲解一个实际的灰盒分析实现的例子。">
+<meta name="keywords" content="XSS 自动化">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于污点分析的XSS漏洞辅助挖掘的一种方式">
+<meta property="og:url" content="https://LyleMi.github.io/2019/06/12/xss-auto/index.html">
 <meta property="og:site_name" content="Lyle&#39;s Blog">
+<meta property="og:description" content="序我在之前的一篇文章中简单讲解了Web应用代码自动化审计的几种实现方式。 这篇文章以自动化辅助挖掘XSS漏洞漏洞为例，简单的讲解一个实际的灰盒分析实现的例子。">
 <meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2019-06-12T02:38:34.185Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Lyle&#39;s Blog">
+<meta name="twitter:title" content="基于污点分析的XSS漏洞辅助挖掘的一种方式">
+<meta name="twitter:description" content="序我在之前的一篇文章中简单讲解了Web应用代码自动化审计的几种实现方式。 这篇文章以自动化辅助挖掘XSS漏洞漏洞为例，简单的讲解一个实际的灰盒分析实现的例子。">
   
     <link rel="alternative" href="/atom.xml" title="Lyle&#39;s Blog" type="application/atom+xml">
   
@@ -136,36 +141,130 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-xss-auto" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2019" class="archive-year">2019</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/06/12/xss-auto/" class="archive-article-date">
-  	<time datetime="2019-06-12T02:37:07.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-06-12</time>
-</a>
-        </div>
-    	 
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/06/12/xss-auto/">基于污点分析的XSS漏洞辅助挖掘的一种方式</a>
+    <h1 class="article-title" itemprop="name">
+      基于污点分析的XSS漏洞辅助挖掘的一种方式
     </h1>
   
 
-        <div class="article-info info-on-right">
-          
+        
+        <a href="/2019/06/12/xss-auto/" class="archive-article-date">
+  	<time datetime="2019-06-12T02:37:07.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-06-12</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="序"><a href="#序" class="headerlink" title="序"></a>序</h2><p>我在之前的一篇<a href="https://blog.lyle.ac.cn/2019/04/06/Web-Application-Auto-Audit/" target="_blank" rel="noopener">文章</a>中简单讲解了Web应用代码自动化审计的几种实现方式。</p>
+<p>这篇文章以自动化辅助挖掘XSS漏洞漏洞为例，简单的讲解一个实际的灰盒分析实现的例子。</p>
+<a id="more"></a>
+<p>在上文中有提到到，漏洞可以认为是输入到危险函数的过程，所以这篇文章涉及到的主要是输入、危险函数、具体实现这三个部分。</p>
+<h2 id="输入"><a href="#输入" class="headerlink" title="输入"></a>输入</h2><p>作为污点来源的输入主要考虑当前状态、网络请求和存储函数三个来源。</p>
+<p>当前状态主要指像窗口名、当前Url、Hash、referr等，具体对应如下这些变量：</p>
+<ul>
+<li><code>window.name</code></li>
+<li><code>window.location.href</code></li>
+<li><code>window.location.search</code></li>
+<li><code>window.location.hash</code></li>
+<li><code>window.location.pathname</code></li>
+<li><code>window.location.url</code></li>
+<li><code>document.URL</code></li>
+<li><code>document.documentURI</code></li>
+<li><code>document.URLUnencoded</code></li>
+<li><code>document.baseURI</code></li>
+<li><code>document.referrer</code></li>
+</ul>
+<p>网络请求主要指使用异步方式获取的请求及其响应，这部分可以通过hook <code>XMLHttpRequest</code> <code>fetch</code> 等API来获取。</p>
+<p>存储主要指Cookie、Indexdb、localStorage、sessionStorage等。</p>
+<p>部分输入在网页初始化时已经确定，这部分由程序记录下来。部分输入会不断变化，如cookie等，这部分输入会通过插桩、事件处理等方式进行监控，并实时对变化进行记录。</p>
+<h2 id="危险函数"><a href="#危险函数" class="headerlink" title="危险函数"></a>危险函数</h2><p>这里把危险函数分为直接执行JavaScript、加载URL、执行HTML、创建元素、部分可控执行五类，具体涉及到的函数与相关模式如下。</p>
+<h3 id="直接执行JavaScript"><a href="#直接执行JavaScript" class="headerlink" title="直接执行JavaScript"></a>直接执行JavaScript</h3><p>这类危险函数直接把输入以JavaScript代码的形式执行，例如。</p>
+<ul>
+<li><code>eval(payload)</code></li>
+<li><code>setTimeout(payload, 100)</code></li>
+<li><code>setInterval(payload, 100)</code></li>
+<li><code>Function(payload)()</code></li>
+<li><code>&lt;script&gt;payload&lt;/script&gt;</code></li>
+<li><code>&lt;img src=x onerror=payload&gt;</code></li>
+</ul>
+<h3 id="加载URL"><a href="#加载URL" class="headerlink" title="加载URL"></a>加载URL</h3><p>这类危险函数以URL加载的形式执行JavaScript代码，但是大体和JavaScript类似。</p>
+<ul>
+<li><code>location=javascript:alert(/xss/)</code></li>
+<li><code>location.href=javascript:alert(/xss/)</code></li>
+<li><code>location.assign(javascript:alert(/xss/))</code></li>
+<li><code>location.replace(javascript:alert(/xss/))</code></li>
+</ul>
+<h3 id="执行HTML"><a href="#执行HTML" class="headerlink" title="执行HTML"></a>执行HTML</h3><p>这类危险函数直接把输入以HTML代码的形式执行，在一定情况下可以执行代码。</p>
+<ul>
+<li><code>xx.innerHTML=payload</code></li>
+<li><code>xx.outerHTML=payload</code></li>
+<li><code>document.write(payload)</code></li>
+<li><code>document.writeln(payload)</code></li>
+</ul>
+<h3 id="创建元素"><a href="#创建元素" class="headerlink" title="创建元素"></a>创建元素</h3><p>这类调用大多是创建一个DOM元素，并将其加入页面中。当script的源可控或者元素的构造可控的时候，可能会出现问题。</p>
+<ul>
+<li><code>scriptElement.src</code></li>
+<li><code>domElement.appendChild</code></li>
+<li><code>domElement.insertBefore</code></li>
+<li><code>domElement.replaceChild</code></li>
+</ul>
+<h3 id="部分可控执行"><a href="#部分可控执行" class="headerlink" title="部分可控执行"></a>部分可控执行</h3><p>这类调用存在一定的动态成分，可控的程度不高，但是在部分情况下存在价值，因此在工具中加入了对其的监控。</p>
+<ul>
+<li><code>(new Array()).reduce(func)</code></li>
+<li><code>(new Array()).reduceRight(func)</code></li>
+<li><code>(new Array()).map(func)</code></li>
+<li><code>(new Array()).filter(func)</code></li>
+</ul>
+<h2 id="整体架构"><a href="#整体架构" class="headerlink" title="整体架构"></a>整体架构</h2><h3 id="污点追踪"><a href="#污点追踪" class="headerlink" title="污点追踪"></a>污点追踪</h3><p>污点追踪的实现有两种思路，一种思路是hook浏览器native的实现，但是这种方法要求对浏览器本身的实现机制有比较好的了解，而且编译过程复杂，很难迁移。浏览器一旦更新，就需要修改大量的代码来适应。</p>
+<p>另外一种思路是基于浏览器插件做JavaScript层的Hook，这种方式虽然没有浏览器源代码层的hook底层，但是开发更快，更容易迁移，在有新的机制出现时也比较容易适应。</p>
+<p>Chrome插件中，代码分在content-script、background、popup等运行时中。其中只有content-script可以操纵宿主页面的DOM，但是宿主页面JavaScript和content-script也在不同的沙箱中，无法hook，只能使用注入的方式。</p>
+<p>在hook后，当出现危险函数的调用或网络请求时，则将其记录至后台。</p>
+<h3 id="疑似利用确认"><a href="#疑似利用确认" class="headerlink" title="疑似利用确认"></a>疑似利用确认</h3><p>和很多漏洞不同，大部分存储型的漏洞是没有回显的，因此需要做一定的确认工作。</p>
+<p>在获取信息后，以域名为单位。遍历sink和source，查找重合的地方。如果source在sink的参数中出现，就可能是漏洞点。需要注意的是，除了hash之外，网络请求等各种参数不一定可控。另外，需要去除同一域名下，同一参数同一调用的Sink，同一源和同一返回的结果，减少重复数据。</p>
+<p>在具体确认的时候，考虑到，sink中的参数可能是source的一部分，source中也可能只是sink的一部分，因此使用公共子字符串算法，只要字串的长度小于sink和source最小的长度。</p>
+<p>不过即使完全可控，也可能出现waf、sanitizer、难以绕过的csp策略等。因此这种方法会有比较高的误报率，但是相对的，在hook较全的情况下，漏报率会小很多。</p>
+<p>除了上面提到的这种方式，工具还采取了动态污染的方式。通过修改请求参数和修改函数调用时的参数两种方式，传入一些测试性的payload，如果在返回界面获取到了相信的结果，那么漏洞就是存在的。</p>
+<h3 id="结果查看"><a href="#结果查看" class="headerlink" title="结果查看"></a>结果查看</h3><p>这里考虑过直接用插件自带的界面popup / background来显示可能的结果，用浏览器层的localstorge存储数据，但是考虑这种方式会影响浏览器间迁移的兼容性。</p>
+<p>于是最后单独用vuejs + django编写了一个小的站点来接收请求，查看结果。</p>
+<h2 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h2><ul>
+<li><a href="https://zhuanlan.zhihu.com/p/27427557" target="_blank" rel="noopener">基于chrome扩展的脚本注入工具</a></li>
+<li><a href="https://segmentfault.com/a/1190000018918875" target="_blank" rel="noopener">让前端监控数据采集更高效</a></li>
+</ul>
+
+      
+
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
+        </div>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
@@ -177,100 +276,106 @@
 		</ul>
 	</div>
 
-          
+      
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=https://LyleMi.github.io/2019/06/12/xss-auto/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/04/20/cve-2019-0232/" class="archive-article-date">
-  	<time datetime="2019-04-20T04:43:30.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-04-20</time>
-</a>
+<nav id="article-nav">
+  
+  
+    <a href="/2019/04/20/cve-2019-0232/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">CVE-2019-0232：Apache Tomcat RCE漏洞分析</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
+        
+        
+    </div>
+</aside>
+
+
+
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/04/20/cve-2019-0232/">CVE-2019-0232：Apache Tomcat RCE漏洞分析</a>
-    </h1>
+  
   
 
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/04/06/Web-Application-Auto-Audit/" class="archive-article-date">
-  	<time datetime="2019-04-06T10:17:22.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-04-06</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/04/06/Web-Application-Auto-Audit/">Web应用代码自动化审计浅谈</a>
-    </h1>
   
 
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/02/27/bypass-xss-mitigation-via-gadgets/" class="archive-article-date">
-  	<time datetime="2019-02-27T01:49:17.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-02-27</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/02/27/bypass-xss-mitigation-via-gadgets/">基于Gadgets绕过XSS防御机制</a>
-    </h1>
   
 
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
   
-  
-    </div></section>
-  
-
-    
 
 
           </div>
@@ -293,8 +398,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,
