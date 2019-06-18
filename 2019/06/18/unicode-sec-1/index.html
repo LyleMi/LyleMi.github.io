@@ -6,15 +6,20 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://LyleMi.github.io">
-  <title>Lyle&#39;s Blog</title>
+  <title>浅谈Unicode设计的安全性 | Lyle&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Lyle&#39;s Blog">
-<meta property="og:url" content="https://LyleMi.github.io/index.html">
+  <meta name="description" content="1. 简介1.1 编码在1963年，计算机使用尚不广泛，主要使用7-bit的ASCII编码（American Standard Code for Information Interchange，美国信息互换标准代码）来作为字符的编码，只支持常用的少数一些字符。但是随着计算机的不断普及，各个国家和地区开始制造自己的编码规范，同时互相不进行兼容，编码逐渐成为了一个问题。">
+<meta name="keywords" content="Unicode">
+<meta property="og:type" content="article">
+<meta property="og:title" content="浅谈Unicode设计的安全性">
+<meta property="og:url" content="https://LyleMi.github.io/2019/06/18/unicode-sec-1/index.html">
 <meta property="og:site_name" content="Lyle&#39;s Blog">
+<meta property="og:description" content="1. 简介1.1 编码在1963年，计算机使用尚不广泛，主要使用7-bit的ASCII编码（American Standard Code for Information Interchange，美国信息互换标准代码）来作为字符的编码，只支持常用的少数一些字符。但是随着计算机的不断普及，各个国家和地区开始制造自己的编码规范，同时互相不进行兼容，编码逐渐成为了一个问题。">
 <meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2019-06-18T14:42:53.787Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Lyle&#39;s Blog">
+<meta name="twitter:title" content="浅谈Unicode设计的安全性">
+<meta name="twitter:description" content="1. 简介1.1 编码在1963年，计算机使用尚不广泛，主要使用7-bit的ASCII编码（American Standard Code for Information Interchange，美国信息互换标准代码）来作为字符的编码，只支持常用的少数一些字符。但是随着计算机的不断普及，各个国家和地区开始制造自己的编码规范，同时互相不进行兼容，编码逐渐成为了一个问题。">
   
     <link rel="alternative" href="/atom.xml" title="Lyle&#39;s Blog" type="application/atom+xml">
   
@@ -136,16 +141,14 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-    <article id="post-unicode-sec-1" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+            <article id="post-unicode-sec-1" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/06/18/unicode-sec-1/">浅谈Unicode设计的安全性</a>
+    <h1 class="article-title" itemprop="name">
+      浅谈Unicode设计的安全性
     </h1>
   
 
@@ -159,11 +162,64 @@
     <div class="article-entry" itemprop="articleBody">
       
         <h2 id="1-简介"><a href="#1-简介" class="headerlink" title="1. 简介"></a>1. 简介</h2><h3 id="1-1-编码"><a href="#1-1-编码" class="headerlink" title="1.1 编码"></a>1.1 编码</h3><p>在1963年，计算机使用尚不广泛，主要使用7-bit的ASCII编码（American Standard Code for Information Interchange，美国信息互换标准代码）来作为字符的编码，只支持常用的少数一些字符。但是随着计算机的不断普及，各个国家和地区开始制造自己的编码规范，同时互相不进行兼容，编码逐渐成为了一个问题。</p>
-        
-          <a class="article-more-a" href="/2019/06/18/unicode-sec-1/#more">more >></a>
-        
+<a id="more"></a>
+<h3 id="1-2-Unicode"><a href="#1-2-Unicode" class="headerlink" title="1.2 Unicode"></a>1.2 Unicode</h3><p>而后ISO(International Organization for Standardization, 国际标准化组织) 开始尝试制定包含大部分字母和符号的编码，称为”Universal Multiple-Octet Coded Character Set”，简称UCS, 俗称Unicode。</p>
+<p>Unicode实际上是一个字符和数字之间的映射关系表，并不制定实际的编码方案。因此又开始制定UTF(Unicode Transformation Formats)标准，包括UTF-8、UTF-16和UTF-32等。可以理解为Unicode是一个设计图，而UTF-X是其中一种实现。</p>
+<h3 id="1-3-Code-Point-与-Code-Unit"><a href="#1-3-Code-Point-与-Code-Unit" class="headerlink" title="1.3 Code Point 与 Code Unit"></a>1.3 Code Point 与 Code Unit</h3><p>Code Point指Unicode标准里字符的编号，比如用目前Unicode使用了0 ~ 0x10FFFF的编码范围，通常用U+xxxx来表示某个字符。</p>
+<p>Code Unit指某种Unicode编码方式里编码一个Code Point需要的最少字节数，比如UTF-8需要最少一个字节，UTF-16 最少两个字节，UCS-2两个字节，UCS-4和UTF-32四个字节，后面三个是定长编码。</p>
+<h2 id="2-视觉欺骗"><a href="#2-视觉欺骗" class="headerlink" title="2. 视觉欺骗"></a>2. 视觉欺骗</h2><p>视觉欺骗问题是最常见的也是考虑最多的Unicode安全问题。视觉问题一般指几个不同的不同的字符在某个字体下看起来较为相同。可能是字符之间一对一相似、多个字符的组合字符和一个字符相似等，这种现象在字体较小的情况下会更加明显，在一些文章中这种问题也被称为同形异义词(homographs)问题。</p>
+<h3 id="2-1-国际化域名"><a href="#2-1-国际化域名" class="headerlink" title="2.1 国际化域名"></a>2.1 国际化域名</h3><p>国际化域名（Internationalized Domain Name，IDN）又称特殊字符域名，是指部分或完全使用特殊的文字或字母组成的互联网域名，包括中文、法语、阿拉伯语、希伯来语或拉丁字母等非英文字母，这些文字经多字节万国码编码而成。</p>
+<p>因为浏览器对国家化域名的支持，这就使得可以出现 <code>аррӏе.com</code> (其中I是U+04CF) 这样的域名。在地址栏中，这样的域名看上去会和 <code>apple.com</code> 比较相似。</p>
+<blockquote>
+<p>注: 这个例子在Chrome中已经被修复，但是Firefox中仍然生效。</p>
+</blockquote>
+<p>同样在Url中，一些看上去和控制字符类似的Unicode也会造成问题，例如 <code>/</code> 和 <code>⁄</code> (U+2044)看起来就很相似，<code>example.com⁄evil.com</code> 实际上是 <code>com⁄evil.com</code> 的子域名。同样的 <code>?</code> / <code>.</code> / <code>#</code> 等类似字符也存在这样的问题。</p>
+<p>除了上面提到的两种情况，punycode也是一种视觉欺骗的形式，punycode是域名的一种编码，会以 <code>xn--</code> 开头，后面是普通的有效域名，例如 <code>аррӏе.com</code> 对应的punycode就是 <code>xn--80ak6aa92e.com</code>。当chrome认为这是一个视觉问题时，就会主动把域名以punycode显示，以减少混淆的影响。但是反过来，也能应用这种方式来实现视觉欺骗，例如 <code>䕮䕵䕶䕱.com</code> 的punycode形式就是 <code>xn--google.com</code>。</p>
+<h3 id="2-2-双向显示"><a href="#2-2-双向显示" class="headerlink" title="2.2 双向显示"></a>2.2 双向显示</h3><p>阿拉伯和希伯来语是从右往左阅读的，这在一些场景下可能造成问题。例如一个名为 <code>txt.exe</code> ，加入Unicode的控制字符后，在用户界面看起来是 <code>exe.txt</code> ，这样就有可能导致用户的误判。</p>
+<h3 id="2-3-数字显示"><a href="#2-3-数字显示" class="headerlink" title="2.3 数字显示"></a>2.3 数字显示</h3><p>一些国家的数字在显示的时候也可能造成问题，例如孟加拉语的0-9是০ ১ ২ ৩ ৪ ৫ ৬ ৭ ৮ ৯，但是这里的৪ (U+09EA) 实际上是数字4。ASIS CTF 2019 的 <a href="(https://github.com/hyperreality/ctf-writeups/tree/master/2019-asis">Unicorn Shop</a>) 也是从Unicode背后的数字角度出发考虑问题。</p>
+<h2 id="3-非视觉漏洞"><a href="#3-非视觉漏洞" class="headerlink" title="3. 非视觉漏洞"></a>3. 非视觉漏洞</h2><p>除了视觉漏洞之外，还有很多其他方面的漏洞。这些问题主要字符是转换导致的字符串。关于字符串处理转换的细节，可以参考我之前的这篇<a href="https://lylemi.github.io/2018/10/29/unicode-normalization/">文章</a>。</p>
+<h3 id="3-1-等价形式"><a href="#3-1-等价形式" class="headerlink" title="3.1 等价形式"></a>3.1 等价形式</h3><p>在WAF类处理，很容易想到的是 <code>LocalHost</code> 和 <code>localhost</code> 等同，但是 <code>ⓛocaⓛhost</code> 这种情景就不太容易被处理。在SSRF中的防御中，如果没有做对应的处理，这种替换就可以完成一些bypass。</p>
+<h3 id="3-2-字符删除"><a href="#3-2-字符删除" class="headerlink" title="3.2 字符删除"></a>3.2 字符删除</h3><p>例如 <code>\x3c\x73\x63\x72\xc2\x69\x70\x74\x3e</code> 这个字符串中，而 <code>\xc2</code>  并不是任何一个有效字符的子串，在一些处理逻辑中，可能会删除 <code>\xc2</code> 这个字符，从而导致问题。</p>
+<h3 id="3-3-字符替换"><a href="#3-3-字符替换" class="headerlink" title="3.3 字符替换"></a>3.3 字符替换</h3><p>一些情况下，字符会被替换为其他的字符 如U+FFFF会被替换成 <code>?</code> 这在一些 <code>?</code> 有明确语义的情况下就会出现问题。</p>
+<h3 id="3-4-缓冲区溢出"><a href="#3-4-缓冲区溢出" class="headerlink" title="3.4 缓冲区溢出"></a>3.4 缓冲区溢出</h3><p>在一些大小写转换时，字符会变多，例如 <code>&#39;ß&#39;.toUpperCase()</code> 的运行结果是 <code>SS</code>。如果字符串的长度检查在大小写转换之前，就可能会存在缓冲区溢出问题。</p>
+<h2 id="4-参考链接"><a href="#4-参考链接" class="headerlink" title="4. 参考链接"></a>4. 参考链接</h2><ul>
+<li><a href="http://cldr.unicode.org/" target="_blank" rel="noopener">Unicode CLDR</a></li>
+<li><a href="http://www.unicode.org/reports/tr36/" target="_blank" rel="noopener">Unicode Security Considerations</a></li>
+<li><a href="http://www.unicode.org/reports/tr39/" target="_blank" rel="noopener">Unicode Security Mechanisms</a></li>
+<li><a href="https://10kloc.wordpress.com/2013/08/25/plain-text-doesnt-exist-unicode-and-encodings-demystified/" target="_blank" rel="noopener">Unicode isn’t harmful for health – Unicode Myths debunked and encodings demystified</a></li>
+<li><a href="https://websec.github.io/unicode-security-guide/" target="_blank" rel="noopener">Unicode Security Guide</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/53714077" target="_blank" rel="noopener">其实你并不懂 Unicode</a></li>
+<li><a href="https://lylemi.github.io/2018/12/08/idnfuzz/">IDN Spoof漏洞自动化挖掘</a></li>
+<li><a href="https://lylemi.github.io/2018/10/29/unicode-normalization/">Unicode等价性浅谈</a></li>
+<li><a href="http://www.unicode.org/faq/security.html" target="_blank" rel="noopener">Unicode Security Issues FAQ</a></li>
+<li><a href="https://xlab.tencent.com/en/wp-content/uploads/2019/02/idn-visual-security-deep-thinking.pdf" target="_blank" rel="noopener">IDN Visual Security Deep Thinking</a></li>
+<li><a href="https://github.com/hyperreality/ctf-writeups/tree/master/2019-asis" target="_blank" rel="noopener">ASIS CTF 2019 Unicorn Shop Write-up</a></li>
+<li><a href="https://www.blackhat.com/presentations/bh-usa-09/WEBER/BHUSA09-Weber-UnicodeSecurityPreview-PAPER.pdf" target="_blank" rel="noopener">Black Hat</a></li>
+</ul>
+
       
 
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
+        </div>
       
     </div>
     <div class="article-info article-info-index">
@@ -183,16 +239,75 @@
       
 
       
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2019/06/18/unicode-sec-1/">展开全文 >></a>
-        </p>
-      
 
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
+        </div>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=https://LyleMi.github.io/2019/06/18/unicode-sec-1/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
       
       <div class="clearfix"></div>
     </div>
   </div>
 </article>
+
+  
+<nav id="article-nav">
+  
+  
+    <a href="/2019/06/12/xss-auto/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">基于污点分析的XSS漏洞辅助挖掘的一种方式</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
 
 <aside class="wrap-side-operation">
     <div class="mod-side-operation">
@@ -212,678 +327,14 @@
 
 
 
-
-  
-    <article id="post-xss-auto" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/06/12/xss-auto/">基于污点分析的XSS漏洞辅助挖掘的一种方式</a>
-    </h1>
-  
-
-        
-        <a href="/2019/06/12/xss-auto/" class="archive-article-date">
-  	<time datetime="2019-06-12T02:37:07.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-06-12</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="序"><a href="#序" class="headerlink" title="序"></a>序</h2><p>我在之前的一篇<a href="https://lylemi.github.io/2019/04/06/Web-Application-Auto-Audit/">文章</a>中简单讲解了Web应用代码自动化审计的几种实现方式。</p>
-<p>这篇文章以自动化辅助挖掘XSS漏洞漏洞为例，简单的讲解一个实际的灰盒分析实现的例子。</p>
-        
-          <a class="article-more-a" href="/2019/06/12/xss-auto/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">XSS</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">自动化</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2019/06/12/xss-auto/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-cve-2019-0232" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/04/20/cve-2019-0232/">CVE-2019-0232：Apache Tomcat RCE漏洞分析</a>
-    </h1>
-  
-
-        
-        <a href="/2019/04/20/cve-2019-0232/" class="archive-article-date">
-  	<time datetime="2019-04-20T04:43:30.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-04-20</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h2><h3 id="利用前提"><a href="#利用前提" class="headerlink" title="利用前提"></a>利用前提</h3><p>该漏洞是由于Tomcat CGI将命令行参数传递给Windows程序的方式存在错误，使得CGIServlet被命令注入影响。</p>
-<p>该漏洞只影响Windows平台，要求启用了CGIServlet和enableCmdLineArguments参数。但是CGIServlet和enableCmdLineArguments参数默认情况下都不启用。</p>
-        
-          <a class="article-more-a" href="/2019/04/20/cve-2019-0232/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">CVE</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2019/04/20/cve-2019-0232/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-Web-Application-Auto-Audit" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/04/06/Web-Application-Auto-Audit/">Web应用代码自动化审计浅谈</a>
-    </h1>
-  
-
-        
-        <a href="/2019/04/06/Web-Application-Auto-Audit/" class="archive-article-date">
-  	<time datetime="2019-04-06T10:17:22.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-04-06</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="0-序"><a href="#0-序" class="headerlink" title="0. 序"></a>0. 序</h1><p>代码审计是找到应用缺陷的过程。自动化审计通常有白盒、黑盒、灰盒等多种方式。白盒指通过对源代码的分析找到应用缺陷；黑盒通常不涉及到源代码，多使用模糊测试等方式来找到漏洞；而灰盒则是黑白结合的方式，利用黑盒特性来减少白盒的计算复杂度，使用白盒的信息来衡量漏洞的有效性。</p>
-        
-          <a class="article-more-a" href="/2019/04/06/Web-Application-Auto-Audit/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">自动化</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2019/04/06/Web-Application-Auto-Audit/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-bypass-xss-mitigation-via-gadgets" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/02/27/bypass-xss-mitigation-via-gadgets/">基于Gadgets绕过XSS防御机制</a>
-    </h1>
-  
-
-        
-        <a href="/2019/02/27/bypass-xss-mitigation-via-gadgets/" class="archive-article-date">
-  	<time datetime="2019-02-27T01:49:17.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-02-27</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>这篇文章是之前对CCS 2018 <code>Code-Reuse Attacks for the Web Breaking Cross-Site Scripting Mitigations via Script Gadgets</code> 的阅读笔记，最近整理资料发现放了挺久，于是稍做了一些整理和扩展发了出来。</p>
-        
-          <a class="article-more-a" href="/2019/02/27/bypass-xss-mitigation-via-gadgets/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2019/02/27/bypass-xss-mitigation-via-gadgets/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-idnfuzz" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/12/08/idnfuzz/">IDN Spoof漏洞自动化挖掘</a>
-    </h1>
-  
-
-        
-        <a href="/2018/12/08/idnfuzz/" class="archive-article-date">
-  	<time datetime="2018-12-08T01:34:39.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-12-08</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="0x00-背景"><a href="#0x00-背景" class="headerlink" title="0x00 背景"></a>0x00 背景</h1><h2 id="国际化域名"><a href="#国际化域名" class="headerlink" title="国际化域名"></a>国际化域名</h2><p>国际化域名（Internationalized Domain Name，IDN）又称特殊字符域名，是指部分或完全使用特殊的文字或字母组成的互联网域名，包括中文、法语、阿拉伯语、希伯来语或拉丁字母等非英文字母，这些文字经多字节万国码编码而成。在域名系统中，国际化域名使用Punycode转写并以ASCII字符串储存。</p>
-<h2 id="同形异义攻击"><a href="#同形异义攻击" class="headerlink" title="同形异义攻击"></a>同形异义攻击</h2><p>同形异义字是利用IDN中一些非拉丁字符语种的字母与拉丁字符非常相似，字面看很难区分的特性，找到对应的字符来实现钓鱼攻击。例如16ვ.com(U+10D5)、16ဒ.com (U+1012)、16ҙ.com (U+0499) 都在一定程度上和163.com有相似性，基于一些开放的https证书服务这些域名还能取得相应的证书，进一步增加钓鱼成功的可能性。</p>
-        
-          <a class="article-more-a" href="/2018/12/08/idnfuzz/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2018/12/08/idnfuzz/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-unicode-normalization" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/10/29/unicode-normalization/">Unicode等价性浅谈</a>
-    </h1>
-  
-
-        
-        <a href="/2018/10/29/unicode-normalization/" class="archive-article-date">
-  	<time datetime="2018-10-29T08:56:53.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-10-29</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>做SSRF测试的时候，常提到用类似 <code>ａ</code> 字符来bypass过滤器，之前没有做深究，偶然的一次机会，发现bａidu.com(\uff41)能跳转到百度，但是bаidu.com(\u0430)会被认为是一个新的IDN域名，并不指向baidu.com。</p>
-        
-          <a class="article-more-a" href="/2018/10/29/unicode-normalization/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2018/10/29/unicode-normalization/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-2017-9-27-domato-dom-fuzzer" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/09/27/2017-9-27-domato-dom-fuzzer/">Domato - A DOM Fuzzer</a>
-    </h1>
-  
-
-        
-        <a href="/2017/09/27/2017-9-27-domato-dom-fuzzer/" class="archive-article-date">
-  	<time datetime="2017-09-27T01:31:40.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-09-27</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="0x00-概述"><a href="#0x00-概述" class="headerlink" title="0x00 概述"></a>0x00 概述</h3><p>Domato是Google Project Zero的研究员实现的一套DOM Fuzz工具，该Fuzzer挖掘出了30+来自各浏览器的漏洞，是一款比较高效的Fuzzer。</p>
-<p>其基本思路和正常的fuzzer一样，也是利用从各个地方抓取的HTML/CSS/JS样本中所包含的语法结构和属性来生成样本。</p>
-<p>整个fuzzer大概可以分为以下几个部分：</p>
-<ul>
-<li><code>generator.py</code> 根据输入的语法生成样本的引擎</li>
-<li><code>grammar.py</code> 解析参数然后调用基础引擎来生成样本</li>
-<li><code>*.txt</code> 用于生成HTML，CSS，js代码的语法库 </li>
-</ul>
-        
-          <a class="article-more-a" href="/2017/09/27/2017-9-27-domato-dom-fuzzer/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/browser-fuzz//" class="article-tag-list-link color3">browser fuzz</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2017/09/27/2017-9-27-domato-dom-fuzzer/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-2017-8-14-cve-2017-8496" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/08/14/2017-8-14-cve-2017-8496/">CVE-2017-8496 Edge Type confusion</a>
-    </h1>
-  
-
-        
-        <a href="/2017/08/14/2017-8-14-cve-2017-8496/" class="archive-article-date">
-  	<time datetime="2017-08-14T01:31:40.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-08-14</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="1-Vulnerability-Description"><a href="#1-Vulnerability-Description" class="headerlink" title="1. Vulnerability Description"></a>1. Vulnerability Description</h3><h4 id="1-1-The-Issue"><a href="#1-1-The-Issue" class="headerlink" title="1.1 The Issue"></a>1.1 The Issue</h4><p>崩溃发生在CAttrArray::PrivateFindInl函数中。 在函数中rcx（this）指针应该指向一个CAttrArray，但它实际上指向一个CAttribute。<br>CAttrArray::PrivateFindInl只会执行读取操作，其返回值将被调用函数（CAttrArray::SetParsed）抛弃。 </p>
-        
-          <a class="article-more-a" href="/2017/08/14/2017-8-14-cve-2017-8496/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/cve//" class="article-tag-list-link color4">cve</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2017/08/14/2017-8-14-cve-2017-8496/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-2017-8-11-cve-2016-0003" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/08/11/2017-8-11-cve-2016-0003/">CVE-2016-0003 Edge Type Confusion</a>
-    </h1>
-  
-
-        
-        <a href="/2017/08/11/2017-8-11-cve-2016-0003/" class="archive-article-date">
-  	<time datetime="2017-08-11T01:31:40.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-08-11</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="1-Vulnerability-Description"><a href="#1-Vulnerability-Description" class="headerlink" title="1. Vulnerability Description"></a>1. Vulnerability Description</h3><h4 id="1-1-The-Issue"><a href="#1-1-The-Issue" class="headerlink" title="1.1 The Issue"></a>1.1 The Issue</h4><p>MS Edge CDOMTextNode::get_data type confusion</p>
-<p>特别构造的JavaScript脚本可以触发Microsoft Edge的type confusion，使得可以像访问字符串一样访问C++对象。 这可能导致信息泄露，例如允许攻击者确定指向其他对象或函数的指针的值。</p>
-        
-          <a class="article-more-a" href="/2017/08/11/2017-8-11-cve-2016-0003/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/cve//" class="article-tag-list-link color4">cve</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2017/08/11/2017-8-11-cve-2016-0003/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
   
   
-    <nav id="page-nav">
-      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
-    </nav>
+  
+
+  
+
+  
+
   
 
 
@@ -906,8 +357,8 @@
     <script>
 	var yiliaConfig = {
 		mathjax: false,
-		isHome: true,
-		isPost: false,
+		isHome: false,
+		isPost: true,
 		isArchive: false,
 		isTag: false,
 		isCategory: false,
