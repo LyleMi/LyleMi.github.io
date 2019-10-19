@@ -138,6 +138,130 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-cmdi" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/10/19/cmdi/">命令注入成因小谈</a>
+    </h1>
+  
+
+        
+        <a href="/2019/10/19/cmdi/" class="archive-article-date">
+  	<time datetime="2019-10-19T01:23:51.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-10-19</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>最近做测试的时候，发现不同平台/语言下命令注入的结果会有一定的不同，于是尝试对命令注入的成因做了一个更细致的探索。</p>
+<h2 id="语言实现"><a href="#语言实现" class="headerlink" title="语言实现"></a>语言实现</h2><h3 id="PHP"><a href="#PHP" class="headerlink" title="PHP"></a>PHP</h3><p>PHP命令执行的函数很多，其中大部分函数的实现都在 <code>php-src/ext/standard/exec.c</code> 中:</p>
+<ul>
+<li>system</li>
+<li>exec</li>
+<li>passthru</li>
+<li>proc_open</li>
+<li>shell_exec</li>
+</ul>
+<p>其中 system / exec / passthru 的实现调用链都是 <code>php_exec_ex -&gt; php_exec -&gt; VCWD_POPEN</code> 。</p>
+<p>proc_open 的实现在 <code>php-src/ext/standard/proc_open.c</code> 中，调用 <code>execle / execl</code> 执行 <code>/bin/sh -c</code> 。</p>
+<p>popen的实现在 <code>php-src/ext/standard/file.c</code> 中，和 shell_exec 一样直接调用 <code>VCWD_POPEN</code> 。</p>
+<p>pcntl_exec 的实现在 <code>php-src/ext/pcntl/pcntl.c</code> 中，调用 <code>execve</code> 执行 <code>/bin/sh -c</code>。</p>
+<p>而 <code>VCWD_POPEN</code> 定义在 <code>Zend\zend_virtual_cwd.h</code> 中，根据编译配置有两种实现：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> VCWD_POPEN(command, type) virtual_popen(command, type)</span></span><br><span class="line"><span class="comment">// or</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> VCWD_POPEN(command, type) popen(command, type)</span></span><br></pre></td></tr></table></figure>
+<p>其中 virtual_popen 在 <code>Zend/zend_virtual_cwd.c</code> 中</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">CWD_API FILE *<span class="title">virtual_popen</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span> *command, <span class="keyword">const</span> <span class="keyword">char</span> *type)</span> <span class="comment">/* &#123;&#123;&#123; */</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> popen_ex(command, type, CWDG(cwd).cwd, <span class="literal">NULL</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>所以PHP中的命令执行大都只是对popen做了不同程度和形式的封装。</p>
+<p>可以用下面这个小demo来做简单验证：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line">system(<span class="string">'id'</span>);</span><br><span class="line"><span class="keyword">echo</span> exec(<span class="string">'id'</span>);</span><br><span class="line">passthru(<span class="string">'id'</span>);</span><br><span class="line"><span class="keyword">echo</span> shell_exec(<span class="string">'id'</span>);</span><br><span class="line"></span><br><span class="line">$descriptorspec = <span class="keyword">array</span>(</span><br><span class="line">   <span class="number">0</span> =&gt; <span class="keyword">array</span>(<span class="string">"pipe"</span>, <span class="string">"r"</span>),</span><br><span class="line">   <span class="number">1</span> =&gt; <span class="keyword">array</span>(<span class="string">"pipe"</span>, <span class="string">"w"</span>),</span><br><span class="line">   <span class="number">2</span> =&gt; <span class="keyword">array</span>(<span class="string">"pipe"</span>, <span class="string">"w"</span>)</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line">$process = proc_open(<span class="string">'id'</span>, $descriptorspec, $pipes);</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (is_resource($process)) &#123;</span><br><span class="line">    <span class="keyword">echo</span> stream_get_contents($pipes[<span class="number">1</span>]);</span><br><span class="line">    fclose($pipes[<span class="number">1</span>]);</span><br><span class="line">    $return = proc_close($process);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">$handle = popen(<span class="string">'/usr/bin/id 2&gt;&amp;1'</span>, <span class="string">'r'</span>);</span><br><span class="line">$read = fread($handle, <span class="number">4096</span>);</span><br><span class="line"><span class="keyword">echo</span> $read;</span><br><span class="line">pclose($handle);</span><br><span class="line"></span><br><span class="line">pcntl_exec(<span class="string">'/usr/bin/id'</span>);</span><br></pre></td></tr></table></figure>
+<p>执行 <code>strace -f -e trace=execve php 1.php</code> 可以看到6次 <code>execve(&quot;/bin/sh&quot;, [&quot;sh&quot;, &quot;-c&quot;...</code> 的调用。</p>
+<h3 id="Java"><a href="#Java" class="headerlink" title="Java"></a>Java</h3><p>Java执行系统命令使用 <code>Runtime.getRuntime().exec</code> 。JDK实现 <code>Runtime.getRuntime().exec</code> 实际调用了 <code>ProcessBuilder</code> ，而后 <code>ProcessBuilder</code> 调用 <code>ProcessImpl</code> 使用系统调用 <code>vfork</code> ，把所有参数直接传递至 <code>execve</code> 。</p>
+<p>但是和PHP不同的是，Java并没有调用 <code>popen</code> ，也没有给 <code>execve</code> 传入 <code>sh -c</code> ，而是直接把参数传递至 <code>execve</code> 。</p>
+<p>一个简单的demo如下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.*;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        String [] cmd=&#123;<span class="string">"/usr/bin/id"</span>, <span class="string">"&amp;&amp;"</span>, <span class="string">"/usr/bin/id"</span>&#125;;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            Process proc = Runtime.getRuntime().exec(cmd);</span><br><span class="line">            InputStream fis = proc.getInputStream();</span><br><span class="line">            InputStreamReader isr = <span class="keyword">new</span> InputStreamReader(fis);</span><br><span class="line">            BufferedReader br = <span class="keyword">new</span> BufferedReader(isr);</span><br><span class="line">            String line = <span class="keyword">null</span>;</span><br><span class="line">            <span class="keyword">while</span>((line=br.readLine()) != <span class="keyword">null</span>)    </span><br><span class="line">            &#123;    </span><br><span class="line">                System.out.println(line);    </span><br><span class="line">            &#125;    </span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>用 <code>strace -f -e vfork,execve java Main</code> 跟踪可以看到上面的Java代码在Linux中调用为</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">execve(<span class="string">"/usr/bin/id"</span>, [<span class="string">"/usr/bin/id"</span>, <span class="string">"&amp;&amp;"</span>, <span class="string">"/usr/bin/id"</span>], [<span class="comment">/* 22 vars */</span>]</span><br></pre></td></tr></table></figure>
+<h3 id="Python"><a href="#Python" class="headerlink" title="Python"></a>Python</h3><p>跟踪程序的具体实现需要相对多的精力和时间，有一个相对简单的方式是直接使用 <code>strace</code> 跟踪，例如Python常用的调用是 <code>os.system</code> 和 <code>subprocess.check_output</code> 。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> subprocess</span><br><span class="line"></span><br><span class="line">os.system(<span class="string">'id'</span>)</span><br><span class="line">subprocess.check_output(<span class="string">'id'</span>)</span><br></pre></td></tr></table></figure>
+<p>那么执行 <code>strace -f -e vfork,execve python t.py</code> ，可以发现 <code>system</code> 对应 <code>execve(&quot;/bin/sh&quot;, [&quot;sh&quot;, &quot;-c&quot;, &quot;id&quot;]</code> ，而 <code>subprocess.check_output</code> 对应 <code>execve(&quot;/usr/bin/id&quot;</code> 。</p>
+<h2 id="系统调用"><a href="#系统调用" class="headerlink" title="系统调用"></a>系统调用</h2><p>简单对语言实现层面做了一个了解后，不难看出，大部分语言在Linux平台下，系统调用会调用 <code>popen</code> ，而Windows平台下则是 <code>CreateProcess</code> ，而 <code>popen</code> 和 <code>CreateProcess</code> 的实现则是造成不同场景下命令注入有轻微不同的原因。</p>
+<h3 id="popen"><a href="#popen" class="headerlink" title="popen"></a>popen</h3><p>popen是libc中的函数，当前版本的glibc中，popen的实现在 <code>libio/iopopen.c</code> 中的 <code>_IO_new_popen</code> 函数。这个函数的调用链是： <code>_IO_new_popen -&gt; _IO_new_proc_open -&gt; spawn_process -&gt; __posix_spawn</code> 最后调用了 <code>sh -c</code> 。 <code>sh -c</code> 会将之后传入的字符串当作命令执行，所以在没有做过滤的情况下，PHP的系统调用，Python的 <code>os.system</code> 都会出现问题。</p>
+<p>这里有一个细节是，sh会指向 <code>/bin/sh</code> ，在当前版本的Linux中，<code>/bin/sh</code> 默认指向 <code>/bin/dash</code> 。 <code>dash</code> 编译文件的大小大概在150k左右，而我们常用的 <code>bash</code> 大小在 1000k 左右，很直觉的，<code>bash</code> 的功能会更丰富一些。</p>
+<p>例如 dash 中没有 function 关键字支持，不支持 here string，不支持 数组，dash 不支持 ++ 操作符等，这会在一些利用了bash特性的复杂payload中造成一些不同。</p>
+<p>还有一点需要注意的是虽然 Windows 中也提供了 <code>_popen</code> 作为POSIX的兼容，但是在Windows平台中， <code>_popen</code> 最后调用的是 <code>CreateProcess</code> ，因而与 Linux 平台下的表现有一定的出入。</p>
+<h3 id="CreateProcess"><a href="#CreateProcess" class="headerlink" title="CreateProcess"></a>CreateProcess</h3><p>上面提到在Windows中，调用链的底层会最后创建进程使用的是 <code>CreateProcess</code> ，在普通情况下，这个函数即使不转义也不会出现问题，但是根据Windows文档，当 <code>CreateProcess</code> 中的第一个参数为 bat 文件或是 cmd 文件时，会调用 <code>cmd.exe</code> 。所以当调用的参数第一个是bat文件时，会变成类似 <code>cmd.exe /c &quot;test.bat &amp; id&quot;</code> 的调用，这样就会和 <code>sh -c</code> 一样引入了命令注入的潜在可能。</p>
+<p>例如 <code>String [] cmd={&quot;whoami&quot;, &quot;&amp;&quot;, &quot;whoami&quot;};</code> 并不会正确执行，这里相当于把 <code>&amp;</code> 作为了 whoami 的参数传递了。而 <code>String [] cmd={&quot;sth.bat&quot;, &quot;&amp;&quot;, &quot;whoami&quot;, &quot;&amp;&quot;, &quot;whoami&quot;};</code> 则会执行两次 <code>whoami</code> 。</p>
+<p>还有一个需要注意的特性是，和Linux不同，Windows在处理参数方面有一个特性，如果这里只加上简单的转义还是可能被绕过。例如 <code>&lt;?php system(&#39;dir &quot;\&quot;&amp;whoami&quot;&#39;);</code> 在Linux中会报错，而在Windows会执行 <code>dir</code> 和 <code>whoami</code> 两条命令。</p>
+<p>这是因为Windows在处理命令行参数时，会将 <code>&quot;</code> 中的内容拷贝为下一个参数，直到命令行结束或者遇到下一个 <code>&quot;</code> ，但是对 <code>\&quot;</code> 的处理有误。因此在调用批处理或者cmd文件时，需要做合适的参数检查才能避免漏洞出现。</p>
+<h2 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h2><ul>
+<li>git://git.kernel.org/pub/scm/utils/dash/dash.git</li>
+<li><a href="http://git.savannah.gnu.org/cgit/bash.git/" target="_blank" rel="noopener">http://git.savannah.gnu.org/cgit/bash.git/</a></li>
+<li><a href="https://hg.openjdk.java.net/jdk/jdk" target="_blank" rel="noopener">https://hg.openjdk.java.net/jdk/jdk</a></li>
+<li><a href="https://docs.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw" target="_blank" rel="noopener">https://docs.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw</a></li>
+<li><a href="https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/popen-wpopen?view=vs-2019" target="_blank" rel="noopener">https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/popen-wpopen?view=vs-2019</a></li>
+<li><a href="https://blogs.msdn.microsoft.com/twistylittlepassagesallalike/2011/04/23/everyone-quotes-command-line-arguments-the-wrong-way/" target="_blank" rel="noopener">https://blogs.msdn.microsoft.com/twistylittlepassagesallalike/2011/04/23/everyone-quotes-command-line-arguments-the-wrong-way/</a></li>
+</ul>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">Command Injection</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">Web Security</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2019/10/19/cmdi/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-unicode-sec-1" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -251,11 +375,11 @@
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">XSS</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">自动化</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">自动化</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">XSS</a>
         		</li>
       		
 		</ul>
@@ -774,83 +898,6 @@
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2017/08/14/2017-8-14-cve-2017-8496/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-2017-8-11-cve-2016-0003" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/08/11/2017-8-11-cve-2016-0003/">CVE-2016-0003 Edge Type Confusion</a>
-    </h1>
-  
-
-        
-        <a href="/2017/08/11/2017-8-11-cve-2016-0003/" class="archive-article-date">
-  	<time datetime="2017-08-11T01:31:40.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-08-11</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="1-Vulnerability-Description"><a href="#1-Vulnerability-Description" class="headerlink" title="1. Vulnerability Description"></a>1. Vulnerability Description</h3><h4 id="1-1-The-Issue"><a href="#1-1-The-Issue" class="headerlink" title="1.1 The Issue"></a>1.1 The Issue</h4><p>MS Edge CDOMTextNode::get_data type confusion</p>
-<p>特别构造的JavaScript脚本可以触发Microsoft Edge的type confusion，使得可以像访问字符串一样访问C++对象。 这可能导致信息泄露，例如允许攻击者确定指向其他对象或函数的指针的值。</p>
-        
-          <a class="article-more-a" href="/2017/08/11/2017-8-11-cve-2016-0003/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/cve//" class="article-tag-list-link color4">cve</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2017/08/11/2017-8-11-cve-2016-0003/">展开全文 >></a>
         </p>
       
 
