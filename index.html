@@ -138,82 +138,6 @@
           <div id="js-content" class="content-ll">
             
   
-    <article id="post-2020-04-13-jstricks-1" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/04/13/2020-04-13-jstricks-1/">语言Tricks系列之一</a>
-    </h1>
-  
-
-        
-        <a href="/2020/04/13/2020-04-13-jstricks-1/" class="archive-article-date">
-  	<time datetime="2020-04-13T13:08:29.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-13</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="0x0-序"><a href="#0x0-序" class="headerlink" title="0x0 序"></a>0x0 序</h1><p>最近遇到了不少各种语言的trick，于是想尝试作为一个系列记录下来。一般来说，并不提倡在生产环境中使用任何一种trick，好的代码应该是清晰的、无二义性的。部分trick更属于Undefined Behavior，这些trick在不同环境、不同版本的引擎中甚至会有截然不同的表现，在生产环境中应该避免这种情况。但是安全研究、渗透的过程中，利用这样的特性完成攻击的案例并不少见，所以仅作为研究还是有一定的意义。</p>
-        
-          <a class="article-more-a" href="/2020/04/13/2020-04-13-jstricks-1/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">tricks</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2020/04/13/2020-04-13-jstricks-1/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
     <article id="post-2020-04-13-tricks-1" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -235,26 +159,9 @@
     <div class="article-entry" itemprop="articleBody">
       
         <h1 id="0x0-序"><a href="#0x0-序" class="headerlink" title="0x0 序"></a>0x0 序</h1><p>最近遇到了不少各种语言的trick，于是想尝试作为一个系列记录下来。一般来说，并不提倡在生产环境中使用任何一种trick，好的代码应该是清晰的、无二义性的。部分trick更属于Undefined Behavior，这些trick在不同环境、不同版本的引擎中甚至会有截然不同的表现，在生产环境中应该避免这种情况。但是安全研究、渗透的过程中，利用这样的特性完成攻击的案例并不少见，所以仅作为研究还是有一定的意义。</p>
-<h1 id="0x1-代码与输出"><a href="#0x1-代码与输出" class="headerlink" title="0x1 代码与输出"></a>0x1 代码与输出</h1><p>于是开始此系列的第一篇：</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> a = <span class="number">0</span>;</span><br><span class="line"><span class="built_in">console</span>.log(<span class="number">1</span>, a);</span><br><span class="line"><span class="keyword">if</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="number">2</span>, a);</span><br><span class="line">    a = <span class="number">1</span>;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="number">3</span>, a);</span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">a</span>(<span class="params"></span>) </span>&#123; &#125;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="number">4</span>, a);</span><br><span class="line">    a = <span class="number">21</span>;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="number">5</span>, a);</span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">console</span>.log(<span class="number">6</span>, a);</span><br></pre></td></tr></table></figure>
-<p>以上代码在最新版nodejs的输出会是</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">1 0</span><br><span class="line">2 [Function: a]</span><br><span class="line">3 1</span><br><span class="line">4 1</span><br><span class="line">5 21</span><br><span class="line">6 1</span><br></pre></td></tr></table></figure>
-<p>这里是这个结果是这样出现的：</p>
-<ol>
-<li>第一次输出 <code>0</code></li>
-<li><code>function a()</code> 的定义提升 <code>a</code> 到全局，输出 <code>[Function: a]</code></li>
-<li>全局的 <code>a</code> 被赋值为 <code>1</code> ，在console中输出两次</li>
-<li>局部的 <code>a</code> 被赋值为 <code>21</code> 并在console中输出</li>
-<li>全局的 <code>a</code> 在console中输出</li>
-</ol>
-<h1 id="0x2-调试过程"><a href="#0x2-调试过程" class="headerlink" title="0x2 调试过程"></a>0x2 调试过程</h1><p>以上的整个过程可以通过两种方式确定，一种方式是 <code>node -print-bytecode</code> ，打印出对应的字节码进行参考，具体的字节码如下。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">StackCheck</span><br><span class="line">LdaZero </span><br><span class="line">Star r1</span><br><span class="line">LdaGlobal [0], [5]</span><br><span class="line">Star r3</span><br><span class="line">LdaNamedProperty r3, [1], [7]</span><br><span class="line">Star r2</span><br><span class="line">CallProperty1 r2, r3, r1, [3]</span><br><span class="line">CreateClosure [2], [9], #2</span><br><span class="line">Star r0</span><br><span class="line">LdaGlobal [0], [5]</span><br><span class="line">Star r3</span><br><span class="line">LdaNamedProperty r3, [1], [12]</span><br><span class="line">Star r2</span><br><span class="line">CallProperty1 r2, r3, r0, [10]</span><br><span class="line">LdaSmi [1]</span><br><span class="line">Star r0</span><br><span class="line">LdaGlobal [0], [5]</span><br><span class="line">Star r3</span><br><span class="line">LdaNamedProperty r3, [1], [16]</span><br><span class="line">Star r2</span><br><span class="line">CallProperty1 r2, r3, r0, [14]</span><br><span class="line">Mov r0, r1</span><br><span class="line">LdaGlobal [0], [5]</span><br><span class="line">Star r3</span><br><span class="line">LdaNamedProperty r3, [1], [20]</span><br><span class="line">Star r2</span><br><span class="line">CallProperty1 r2, r3, r1, [18]</span><br><span class="line">LdaSmi [21]</span><br><span class="line">Star r0</span><br><span class="line">LdaGlobal [0], [5]</span><br><span class="line">Star r3</span><br><span class="line">LdaNamedProperty r3, [1], [24]</span><br><span class="line">Star r2</span><br><span class="line">CallProperty1 r2, r3, r0, [22]</span><br><span class="line">LdaGlobal [0], [5]</span><br><span class="line">Star r3</span><br><span class="line">LdaNamedProperty r3, [1], [28]</span><br><span class="line">Star r2</span><br><span class="line">CallProperty1 r2, r3, r1, [26]</span><br><span class="line">LdaUndefined </span><br><span class="line">Return</span><br></pre></td></tr></table></figure>
-<p>一种方式是可以在Chrome中开启调试，可以清晰的看到局部与全局两种作用域。</p>
-<p><img src="data:image/png;base64," alt="debug"></p>
-<h1 id="0x3-参考链接"><a href="#0x3-参考链接" class="headerlink" title="0x3 参考链接"></a>0x3 参考链接</h1><ul>
-<li><a href="https://github.com/v8/v8/blob/master/src/interpreter/interpreter-generator.cc" target="_blank" rel="noopener">v8 interpreter-generator.cc</a></li>
-</ul>
-
+        
+          <a class="article-more-a" href="/2020/04/13/2020-04-13-tricks-1/#more">more >></a>
+        
       
 
       
@@ -864,6 +771,89 @@
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2018/10/29/unicode-normalization/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-2017-9-27-domato-dom-fuzzer" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/09/27/2017-9-27-domato-dom-fuzzer/">Domato - A DOM Fuzzer</a>
+    </h1>
+  
+
+        
+        <a href="/2017/09/27/2017-9-27-domato-dom-fuzzer/" class="archive-article-date">
+  	<time datetime="2017-09-27T01:31:40.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-09-27</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="0x00-概述"><a href="#0x00-概述" class="headerlink" title="0x00 概述"></a>0x00 概述</h3><p>Domato是Google Project Zero的研究员实现的一套DOM Fuzz工具，该Fuzzer挖掘出了30+来自各浏览器的漏洞，是一款比较高效的Fuzzer。</p>
+<p>其基本思路和正常的fuzzer一样，也是利用从各个地方抓取的HTML/CSS/JS样本中所包含的语法结构和属性来生成样本。</p>
+<p>整个fuzzer大概可以分为以下几个部分：</p>
+<ul>
+<li><code>generator.py</code> 根据输入的语法生成样本的引擎</li>
+<li><code>grammar.py</code> 解析参数然后调用基础引擎来生成样本</li>
+<li><code>*.txt</code> 用于生成HTML，CSS，js代码的语法库 </li>
+</ul>
+        
+          <a class="article-more-a" href="/2017/09/27/2017-9-27-domato-dom-fuzzer/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/browser-fuzz//" class="article-tag-list-link color3">browser fuzz</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2017/09/27/2017-9-27-domato-dom-fuzzer/">展开全文 >></a>
         </p>
       
 
