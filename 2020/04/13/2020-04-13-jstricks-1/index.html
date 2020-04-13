@@ -6,19 +6,22 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://LyleMi.github.io">
-  <title>IDN Spoof漏洞自动化挖掘 | Lyle&#39;s Blog</title>
+  <title>语言Tricks系列之一 | Lyle&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="0x00 背景国际化域名国际化域名（Internationalized Domain Name，IDN）又称特殊字符域名，是指部分或完全使用特殊的文字或字母组成的互联网域名，包括中文、法语、阿拉伯语、希伯来语或拉丁字母等非英文字母，这些文字经多字节万国码编码而成。在域名系统中，国际化域名使用Punycode转写并以ASCII字符串储存。 同形异义攻击同形异义字是利用IDN中一些非拉丁字符语种的字母">
+  <meta name="description" content="0x0 序最近遇到了不少各种语言的trick，于是想尝试作为一个系列记录下来。一般来说，并不提倡在生产环境中使用任何一种trick，好的代码应该是清晰的、无二义性的。部分trick更属于Undefined Behavior，这些trick在不同环境、不同版本的引擎中甚至会有截然不同的表现，在生产环境中应该避免这种情况。但是安全研究、渗透的过程中，利用这样的特性完成攻击的案例并不少见，所以仅作为研究">
+<meta name="keywords" content="tricks">
 <meta property="og:type" content="article">
-<meta property="og:title" content="IDN Spoof漏洞自动化挖掘">
-<meta property="og:url" content="https://LyleMi.github.io/2018/12/08/idnfuzz/index.html">
+<meta property="og:title" content="语言Tricks系列之一">
+<meta property="og:url" content="https://LyleMi.github.io/2020/04/13/2020-04-13-jstricks-1/index.html">
 <meta property="og:site_name" content="Lyle&#39;s Blog">
-<meta property="og:description" content="0x00 背景国际化域名国际化域名（Internationalized Domain Name，IDN）又称特殊字符域名，是指部分或完全使用特殊的文字或字母组成的互联网域名，包括中文、法语、阿拉伯语、希伯来语或拉丁字母等非英文字母，这些文字经多字节万国码编码而成。在域名系统中，国际化域名使用Punycode转写并以ASCII字符串储存。 同形异义攻击同形异义字是利用IDN中一些非拉丁字符语种的字母">
+<meta property="og:description" content="0x0 序最近遇到了不少各种语言的trick，于是想尝试作为一个系列记录下来。一般来说，并不提倡在生产环境中使用任何一种trick，好的代码应该是清晰的、无二义性的。部分trick更属于Undefined Behavior，这些trick在不同环境、不同版本的引擎中甚至会有截然不同的表现，在生产环境中应该避免这种情况。但是安全研究、渗透的过程中，利用这样的特性完成攻击的案例并不少见，所以仅作为研究">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2019-06-12T23:28:38.347Z">
+<meta property="og:image" content="https://lylemi.github.io/images/2020-04-13-tricks-1/1.png">
+<meta property="og:updated_time" content="2020-04-13T13:42:06.128Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="IDN Spoof漏洞自动化挖掘">
-<meta name="twitter:description" content="0x00 背景国际化域名国际化域名（Internationalized Domain Name，IDN）又称特殊字符域名，是指部分或完全使用特殊的文字或字母组成的互联网域名，包括中文、法语、阿拉伯语、希伯来语或拉丁字母等非英文字母，这些文字经多字节万国码编码而成。在域名系统中，国际化域名使用Punycode转写并以ASCII字符串储存。 同形异义攻击同形异义字是利用IDN中一些非拉丁字符语种的字母">
+<meta name="twitter:title" content="语言Tricks系列之一">
+<meta name="twitter:description" content="0x0 序最近遇到了不少各种语言的trick，于是想尝试作为一个系列记录下来。一般来说，并不提倡在生产环境中使用任何一种trick，好的代码应该是清晰的、无二义性的。部分trick更属于Undefined Behavior，这些trick在不同环境、不同版本的引擎中甚至会有截然不同的表现，在生产环境中应该避免这种情况。但是安全研究、渗透的过程中，利用这样的特性完成攻击的案例并不少见，所以仅作为研究">
+<meta name="twitter:image" content="https://lylemi.github.io/images/2020-04-13-tricks-1/1.png">
   
     <link rel="alternative" href="/atom.xml" title="Lyle&#39;s Blog" type="application/atom+xml">
   
@@ -140,57 +143,47 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            <article id="post-idnfuzz" class="article article-type-post " itemscope itemprop="blogPost">
+            <article id="post-2020-04-13-jstricks-1" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 class="article-title" itemprop="name">
-      IDN Spoof漏洞自动化挖掘
+      语言Tricks系列之一
     </h1>
   
 
         
-        <a href="/2018/12/08/idnfuzz/" class="archive-article-date">
-  	<time datetime="2018-12-08T01:34:39.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-12-08</time>
+        <a href="/2020/04/13/2020-04-13-jstricks-1/" class="archive-article-date">
+  	<time datetime="2020-04-13T13:08:29.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-13</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h1 id="0x00-背景"><a href="#0x00-背景" class="headerlink" title="0x00 背景"></a>0x00 背景</h1><h2 id="国际化域名"><a href="#国际化域名" class="headerlink" title="国际化域名"></a>国际化域名</h2><p>国际化域名（Internationalized Domain Name，IDN）又称特殊字符域名，是指部分或完全使用特殊的文字或字母组成的互联网域名，包括中文、法语、阿拉伯语、希伯来语或拉丁字母等非英文字母，这些文字经多字节万国码编码而成。在域名系统中，国际化域名使用Punycode转写并以ASCII字符串储存。</p>
-<h2 id="同形异义攻击"><a href="#同形异义攻击" class="headerlink" title="同形异义攻击"></a>同形异义攻击</h2><p>同形异义字是利用IDN中一些非拉丁字符语种的字母与拉丁字符非常相似，字面看很难区分的特性，找到对应的字符来实现钓鱼攻击。例如16ვ.com(U+10D5)、16ဒ.com (U+1012)、16ҙ.com (U+0499) 都在一定程度上和163.com有相似性，基于一些开放的https证书服务这些域名还能取得相应的证书，进一步增加钓鱼成功的可能性。</p>
+        <h1 id="0x0-序"><a href="#0x0-序" class="headerlink" title="0x0 序"></a>0x0 序</h1><p>最近遇到了不少各种语言的trick，于是想尝试作为一个系列记录下来。一般来说，并不提倡在生产环境中使用任何一种trick，好的代码应该是清晰的、无二义性的。部分trick更属于Undefined Behavior，这些trick在不同环境、不同版本的引擎中甚至会有截然不同的表现，在生产环境中应该避免这种情况。但是安全研究、渗透的过程中，利用这样的特性完成攻击的案例并不少见，所以仅作为研究还是有一定的意义。</p>
 <a id="more"></a>
-<h2 id="Punycode"><a href="#Punycode" class="headerlink" title="Punycode"></a>Punycode</h2><p>Punycode是RFC 3492标准设计的编码系统，用于把Unicode转换为可用的DNS系统的编码，比如16ҙ.com就会被转成xn–16-8tc.com，这在一定程度上可以防止IDN欺骗。</p>
-<h1 id="0x01-漏洞介绍"><a href="#0x01-漏洞介绍" class="headerlink" title="0x01 漏洞介绍"></a>0x01 漏洞介绍</h1><p>在主流浏览器中，Chromium Project对这类漏洞关注度较多，甚至特别在安全类型中设置了对应的<a href="https://bugs.chromium.org/p/chromium/issues/list?can=1&amp;q=label:idn-spoof" target="_blank" rel="noopener">idn-spoof</a>标签。</p>
-<p>在chromium中维护了一个domain <a href="https://github.com/chromium/chromium/blob/998ff8fbb32cb0fdf1b6bdd9e885d2b1d7c48bbe/components/url_formatter/top_domains/alexa_domains.list" target="_blank" rel="noopener">list</a>，内置了一些较有知名度的域名，当有域名被认为和这些相似域名相似时，就会转成punycode显示。</p>
-<p>其完整的检测算法可以在<a href="https://github.com/chromium/chromium/blob/69d65bc31ec06259c4aec054fa2439ab8b2b922a/components/url_formatter/idn_spoof_checker.cc" target="_blank" rel="noopener">这里</a>看到，对其详细的解释可以参考这篇<a href="https://tw.saowen.com/a/72b7816b29ef30533882a07a4e1040f696b01e7888d60255ab89d37cf2f18f3e" target="_blank" rel="noopener">文章</a>。</p>
-<p>总的来说，只要找到了一个字符的组合，可以通过Spoof Check，且在浏览器地址栏中显示的字形和top domain相似，就可以认为找到了一个IDN Spoof漏洞。</p>
-<h1 id="0x02-挖掘方法"><a href="#0x02-挖掘方法" class="headerlink" title="0x02 挖掘方法"></a>0x02 挖掘方法</h1><p>Unicode的字符较多，因此笔者考虑一定程度上将漏洞挖掘的过程自动化。最直接的思路是，将域名是否同形的问题转换为图像相似度的问题。</p>
-<p>我们可以遍历所有的Unicode字符，使用浏览器地址栏渲染的字体生成其对应的图像，当其图像和域名中允许出现的ascii字符相似度较高时，则认为是可能造成Spoof的字符。</p>
-<p>在这里笔者使用了<a href="https://en.wikipedia.org/wiki/Perceptual_hashing" target="_blank" rel="noopener">感知哈希算法</a>作为图像相似度的计算的方式，其大致步骤如下：</p>
-<ul>
-<li>将图像缩小至相同尺寸：用于去除图像的细节，保留结构等基本信息</li>
-<li>简化色彩：将缩小后的图像转为64级灰度，减少颜色带来的影响</li>
-<li>计算平均值：计算所有像素的灰度平均值</li>
-<li>比较像素的灰度：将每个像素的灰度，与平均值进行比较，记录结果</li>
-<li>计算Hash值：将上一步的结果组合在一起构成一个整数作为图片的指纹</li>
-</ul>
-<p>在获取到Unicode字符图片对应的Hash值后，使用计算汉明距离的方式计算两个图片的距离，就可以得到较为相似的字符列表了。</p>
-<p>当找到符合条件的字符后，则找到包含该字符的域名，替换该字符进行测试，检测其是否能通过Spoof Check。这里直接使用Chrome测试不太方便，这里笔者抽取了其中部分代码形成独立的脚本进行测试。</p>
-<p>另外对一些特别的字符，如 <code>/</code> / <code>?</code> / <code>.</code> / <code>#</code> 等，则构造包含对应字符的URL进行测试。</p>
-<p>通过图像相似度和Spoof Check的测试后，最后进行人工的确认，如确实是可能造成Spoof的字符，则认为是漏洞并报告。</p>
-<h1 id="0x03-挖掘结果"><a href="#0x03-挖掘结果" class="headerlink" title="0x03 挖掘结果"></a>0x03 挖掘结果</h1><p>经测试，笔者成功找到了 <code>crbug.com/904325</code> 、 <code>crbug.com/904627</code> 等尚未修复的Spoof漏洞。</p>
-<h1 id="0x04-参考资料"><a href="#0x04-参考资料" class="headerlink" title="0x04 参考资料"></a>0x04 参考资料</h1><ul>
-<li><a href="https://en.wikipedia.org/wiki/Internationalized_domain_name" target="_blank" rel="noopener">https://en.wikipedia.org/wiki/Internationalized_domain_name</a></li>
-<li><a href="https://www.unicode.org/faq/idn.html" target="_blank" rel="noopener">https://www.unicode.org/faq/idn.html</a></li>
-<li><a href="https://xlab.tencent.com/en/2018/11/13/cve-2018-4277/" target="_blank" rel="noopener">https://xlab.tencent.com/en/2018/11/13/cve-2018-4277/</a></li>
-<li><a href="https://en.wikipedia.org/wiki/IDN_homograph_attack" target="_blank" rel="noopener">https://en.wikipedia.org/wiki/IDN_homograph_attack</a></li>
-<li><a href="https://tw.saowen.com/a/72b7816b29ef30533882a07a4e1040f696b01e7888d60255ab89d37cf2f18f3e" target="_blank" rel="noopener">https://tw.saowen.com/a/72b7816b29ef30533882a07a4e1040f696b01e7888d60255ab89d37cf2f18f3e</a></li>
-<li><a href="https://en.wikipedia.org/wiki/Perceptual_hashing" target="_blank" rel="noopener">https://en.wikipedia.org/wiki/Perceptual_hashing</a></li>
-<li>Gontmakher A . The Homograph Attack[J]. Communications of the Acm, 2002, 45(2):128.</li>
+<h1 id="0x1-代码与输出"><a href="#0x1-代码与输出" class="headerlink" title="0x1 代码与输出"></a>0x1 代码与输出</h1><p>于是开始此系列的第一篇：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> a = <span class="number">0</span>;</span><br><span class="line"><span class="built_in">console</span>.log(<span class="number">1</span>, a);</span><br><span class="line"><span class="keyword">if</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="number">2</span>, a);</span><br><span class="line">    a = <span class="number">1</span>;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="number">3</span>, a);</span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">a</span>(<span class="params"></span>) </span>&#123; &#125;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="number">4</span>, a);</span><br><span class="line">    a = <span class="number">21</span>;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="number">5</span>, a);</span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">console</span>.log(<span class="number">6</span>, a);</span><br></pre></td></tr></table></figure>
+<p>以上代码在最新版nodejs的输出会是</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">1 0</span><br><span class="line">2 [Function: a]</span><br><span class="line">3 1</span><br><span class="line">4 1</span><br><span class="line">5 21</span><br><span class="line">6 1</span><br></pre></td></tr></table></figure>
+<p>这里是这个结果是这样出现的：</p>
+<ol>
+<li>第一次输出 <code>0</code></li>
+<li><code>function a()</code> 的定义提升 <code>a</code> 到全局，输出 <code>[Function: a]</code></li>
+<li>全局的 <code>a</code> 被赋值为 <code>1</code> ，在console中输出两次</li>
+<li>局部的 <code>a</code> 被赋值为 <code>21</code> 并在console中输出</li>
+<li>全局的 <code>a</code> 在console中输出</li>
+</ol>
+<h1 id="0x2-调试过程"><a href="#0x2-调试过程" class="headerlink" title="0x2 调试过程"></a>0x2 调试过程</h1><p>以上的整个过程可以通过两种方式确定，一种方式是 <code>node -print-bytecode</code> ，打印出对应的字节码进行参考，具体的字节码如下。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">StackCheck</span><br><span class="line">LdaZero </span><br><span class="line">Star r1</span><br><span class="line">LdaGlobal [0], [5]</span><br><span class="line">Star r3</span><br><span class="line">LdaNamedProperty r3, [1], [7]</span><br><span class="line">Star r2</span><br><span class="line">CallProperty1 r2, r3, r1, [3]</span><br><span class="line">CreateClosure [2], [9], #2</span><br><span class="line">Star r0</span><br><span class="line">LdaGlobal [0], [5]</span><br><span class="line">Star r3</span><br><span class="line">LdaNamedProperty r3, [1], [12]</span><br><span class="line">Star r2</span><br><span class="line">CallProperty1 r2, r3, r0, [10]</span><br><span class="line">LdaSmi [1]</span><br><span class="line">Star r0</span><br><span class="line">LdaGlobal [0], [5]</span><br><span class="line">Star r3</span><br><span class="line">LdaNamedProperty r3, [1], [16]</span><br><span class="line">Star r2</span><br><span class="line">CallProperty1 r2, r3, r0, [14]</span><br><span class="line">Mov r0, r1</span><br><span class="line">LdaGlobal [0], [5]</span><br><span class="line">Star r3</span><br><span class="line">LdaNamedProperty r3, [1], [20]</span><br><span class="line">Star r2</span><br><span class="line">CallProperty1 r2, r3, r1, [18]</span><br><span class="line">LdaSmi [21]</span><br><span class="line">Star r0</span><br><span class="line">LdaGlobal [0], [5]</span><br><span class="line">Star r3</span><br><span class="line">LdaNamedProperty r3, [1], [24]</span><br><span class="line">Star r2</span><br><span class="line">CallProperty1 r2, r3, r0, [22]</span><br><span class="line">LdaGlobal [0], [5]</span><br><span class="line">Star r3</span><br><span class="line">LdaNamedProperty r3, [1], [28]</span><br><span class="line">Star r2</span><br><span class="line">CallProperty1 r2, r3, r1, [26]</span><br><span class="line">LdaUndefined </span><br><span class="line">Return</span><br></pre></td></tr></table></figure>
+<p>一种方式是可以在Chrome中开启调试，可以清晰的看到局部与全局两种作用域。</p>
+<p><img src="/images/2020-04-13-tricks-1/1.png" alt="Chrome调试"></p>
+<h1 id="0x3-参考链接"><a href="#0x3-参考链接" class="headerlink" title="0x3 参考链接"></a>0x3 参考链接</h1><ul>
+<li><a href="https://github.com/v8/v8/blob/master/src/interpreter/interpreter-generator.cc" target="_blank" rel="noopener">v8 interpreter-generator.cc</a></li>
+<li><a href="https://github.com/creeperyang/blog/issues/16" target="_blank" rel="noopener">深入理解JS中声明提升、作用域（链）和<code>this</code>关键字</a></li>
 </ul>
 
       
@@ -221,6 +214,17 @@
     <div class="article-info article-info-index">
       
       
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">tricks</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
       
 
       
@@ -271,7 +275,7 @@
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//pan.baidu.com/share/qrcode?url=https://LyleMi.github.io/2018/12/08/idnfuzz/" alt="微信分享二维码">
+      <img src="//pan.baidu.com/share/qrcode?url=https://LyleMi.github.io/2020/04/13/2020-04-13-jstricks-1/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -285,18 +289,9 @@
   
 <nav id="article-nav">
   
-    <a href="/2019/02/27/bypass-xss-mitigation-via-gadgets/" id="article-nav-newer" class="article-nav-link-wrap">
-      <i class="icon-circle-left"></i>
-      <div class="article-nav-title">
-        
-          基于Gadgets绕过XSS防御机制
-        
-      </div>
-    </a>
   
-  
-    <a href="/2018/10/29/unicode-normalization/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">Unicode等价性浅谈</div>
+    <a href="/2020/04/13/2020-04-13-tricks-1/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">语言Tricks系列之一</div>
       <i class="icon-circle-right"></i>
     </a>
   
