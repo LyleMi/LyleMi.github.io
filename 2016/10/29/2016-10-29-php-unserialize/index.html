@@ -9,13 +9,14 @@
   <title>php unserialize()/wakeup()漏洞 | Lyle&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="unserialize和serialize这里不做赘述。 unserialize的漏洞在magic function上，如果一个类定义了__wakup()和__destruct()，则该类的实例被反序列化时，会自动调用__wakeup(), 生命周期结束时，则调用__desturct()。">
+<meta name="keywords" content="反序列化,PHP">
 <meta property="og:type" content="article">
 <meta property="og:title" content="php unserialize()&#x2F;wakeup()漏洞">
 <meta property="og:url" content="https://LyleMi.github.io/2016/10/29/2016-10-29-php-unserialize/index.html">
 <meta property="og:site_name" content="Lyle&#39;s Blog">
 <meta property="og:description" content="unserialize和serialize这里不做赘述。 unserialize的漏洞在magic function上，如果一个类定义了__wakup()和__destruct()，则该类的实例被反序列化时，会自动调用__wakeup(), 生命周期结束时，则调用__desturct()。">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2019-06-12T23:28:38.191Z">
+<meta property="og:updated_time" content="2020-04-14T12:05:17.026Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="php unserialize()&#x2F;wakeup()漏洞">
 <meta name="twitter:description" content="unserialize和serialize这里不做赘述。 unserialize的漏洞在magic function上，如果一个类定义了__wakup()和__destruct()，则该类的实例被反序列化时，会自动调用__wakeup(), 生命周期结束时，则调用__desturct()。">
@@ -209,13 +210,28 @@
     <div class="article-info article-info-index">
       
       
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">反序列化</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">PHP</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
       
 	<div class="article-category tagcloud">
 		<i class="icon-book icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="/categories/web//" class="article-tag-list-link color4">web</a>
+        			<a href="/categories/Web//" class="article-tag-list-link color4">Web</a>
         		</li>
       		
 		</ul>

@@ -9,7 +9,7 @@
   <title>语言Tricks系列之一 | Lyle&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="0x0 序最近遇到了不少各种语言的trick，于是想尝试作为一个系列记录下来。一般来说，并不提倡在生产环境中使用任何一种trick，好的代码应该是清晰的、无二义性的。部分trick更属于Undefined Behavior，这些trick在不同环境、不同版本的引擎中甚至会有截然不同的表现，在生产环境中应该避免这种情况。但是安全研究、渗透的过程中，利用这样的特性完成攻击的案例并不少见，所以仅作为研究">
-<meta name="keywords" content="tricks">
+<meta name="keywords" content="Tricks">
 <meta property="og:type" content="article">
 <meta property="og:title" content="语言Tricks系列之一">
 <meta property="og:url" content="https://LyleMi.github.io/2020/04/13/2020-04-13-tricks-1/index.html">
@@ -17,7 +17,7 @@
 <meta property="og:description" content="0x0 序最近遇到了不少各种语言的trick，于是想尝试作为一个系列记录下来。一般来说，并不提倡在生产环境中使用任何一种trick，好的代码应该是清晰的、无二义性的。部分trick更属于Undefined Behavior，这些trick在不同环境、不同版本的引擎中甚至会有截然不同的表现，在生产环境中应该避免这种情况。但是安全研究、渗透的过程中，利用这样的特性完成攻击的案例并不少见，所以仅作为研究">
 <meta property="og:locale" content="default">
 <meta property="og:image" content="https://lylemi.github.io/images/2020-04-13-tricks-1/1.png">
-<meta property="og:updated_time" content="2020-04-13T13:46:55.181Z">
+<meta property="og:updated_time" content="2020-04-14T12:06:07.086Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="语言Tricks系列之一">
 <meta name="twitter:description" content="0x0 序最近遇到了不少各种语言的trick，于是想尝试作为一个系列记录下来。一般来说，并不提倡在生产环境中使用任何一种trick，好的代码应该是清晰的、无二义性的。部分trick更属于Undefined Behavior，这些trick在不同环境、不同版本的引擎中甚至会有截然不同的表现，在生产环境中应该避免这种情况。但是安全研究、渗透的过程中，利用这样的特性完成攻击的案例并不少见，所以仅作为研究">
@@ -219,13 +219,24 @@
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">tricks</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">Tricks</a>
         		</li>
       		
 		</ul>
 	</div>
 
       
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Misc//" class="article-tag-list-link color5">Misc</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
 
       
 
@@ -288,6 +299,15 @@
 
   
 <nav id="article-nav">
+  
+    <a href="/2020/04/14/transparently-running-binaries-from-any-architecture-in-linux-with-qemu-and-binfmt-misc/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          基于QEMU和binfmt-misc透明运行不同架构程序
+        
+      </div>
+    </a>
   
   
     <a href="/2019/10/19/cmdi/" id="article-nav-older" class="article-nav-link-wrap">
