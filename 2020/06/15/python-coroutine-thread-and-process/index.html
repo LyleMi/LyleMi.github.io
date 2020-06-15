@@ -6,15 +6,20 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://LyleMi.github.io">
-  <title>Archives: 2019 | Lyle&#39;s Blog</title>
+  <title>Python 进程、线程与协程 | Lyle&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Lyle&#39;s Blog">
-<meta property="og:url" content="https://LyleMi.github.io/archives/2019/index.html">
+  <meta name="description" content="0x00 序在程序开发的过程中，会遇到协程、线程与进程之间的选择问题，对这些概念有清晰了解才能写出效率更高的代码。">
+<meta name="keywords" content="Python">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python 进程、线程与协程">
+<meta property="og:url" content="https://LyleMi.github.io/2020/06/15/python-coroutine-thread-and-process/index.html">
 <meta property="og:site_name" content="Lyle&#39;s Blog">
+<meta property="og:description" content="0x00 序在程序开发的过程中，会遇到协程、线程与进程之间的选择问题，对这些概念有清晰了解才能写出效率更高的代码。">
 <meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2020-06-15T14:04:58.443Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Lyle&#39;s Blog">
+<meta name="twitter:title" content="Python 进程、线程与协程">
+<meta name="twitter:description" content="0x00 序在程序开发的过程中，会遇到协程、线程与进程之间的选择问题，对这些概念有清晰了解才能写出效率更高的代码。">
   
     <link rel="alternative" href="/atom.xml" title="Lyle&#39;s Blog" type="application/atom+xml">
   
@@ -136,320 +141,199 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-python-coroutine-thread-and-process" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Python 进程、线程与协程
+    </h1>
+  
+
+        
+        <a href="/2020/06/15/python-coroutine-thread-and-process/" class="archive-article-date">
+  	<time datetime="2020-06-15T11:48:12.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-06-15</time>
+</a>
+        
+      </header>
     
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="0x00-序"><a href="#0x00-序" class="headerlink" title="0x00 序"></a>0x00 序</h1><p>在程序开发的过程中，会遇到协程、线程与进程之间的选择问题，对这些概念有清晰了解才能写出效率更高的代码。</p>
+<a id="more"></a>
+<h1 id="0x01-进程"><a href="#0x01-进程" class="headerlink" title="0x01 进程"></a>0x01 进程</h1><p>对操作系统来说，进程是系统进行资源分配和调度的基本单位，每个进程都有自己的独立内存空间，不同进程通过进程间通信来通信。进程内至少有一个线程，它们共享进程的地址空间，而进程有自己独立的地址空间。</p>
+<p>在多核的场景下，如果想要充分地使用多核CPU的资源，需要使用多进程的形式。Python提供了multiprocessing作为多进程的原生实现，提供了Process、Queue、Pipe、Lock等组件来支持子进程、通信和共享数据、执行不同形式的同步。</p>
+<h1 id="0x02-线程"><a href="#0x02-线程" class="headerlink" title="0x02 线程"></a>0x02 线程</h1><p>线程是操作系统能够进行运算调度的最小单位，它被包含在进程之中，是进程中的实际执行单位。</p>
+<p>CPython的线程是操作系统的原生线程。在Linux上为pthread，在Windows上为Win thread，完全由操作系统调度线程的执行。一个Python解释器进程内有一个主线程，以及多个用户程序的执行线程。</p>
+<h2 id="2-1-GIL"><a href="#2-1-GIL" class="headerlink" title="2.1 GIL"></a>2.1 GIL</h2><p>需要注意的是，即使在多核心CPU平台，由于GIL的存在，也将禁止多线程的并行执行。</p>
+<p>GIL（Global Interpreter Lock）是全局解释器锁，存在于Python解释器中，用来确保当前只有一个线程被执行。GIL的存在保证了只有正在执行的线程才可以与解释器的内核进行通信，避免了混乱。</p>
+<p>当一个线程遇到I/O任务时，将释放GIL。I/O 密集型的多线程程序 GIL 并不是瓶颈，但是计算密集型的多线程程序 GIL 会带来较大的性能损失。</p>
+<h2 id="2-2-最佳线程数"><a href="#2-2-最佳线程数" class="headerlink" title="2.2 最佳线程数"></a>2.2 最佳线程数</h2><p>在开发过程中，需要考虑CPU的核心数和利用率问题，常用的一个公式是 <code>最佳线程数目 = ( ( 线程等待时间 + 线程CPU时间 ) / 线程CPU时间 ) * CPU数目</code> 。</p>
+<h1 id="0x03-协程"><a href="#0x03-协程" class="headerlink" title="0x03 协程"></a>0x03 协程</h1><p>协程（Coroutine），又称微线程、纤程，它自带CPU的上下文，是比线程更小的执行单元。</p>
+<p>协程有极高的执行效率，因为协程间切换是由程序自身控制的，没有线程切换的开销，和多线程比，线程数量越多，协程的性能优势就越明显。</p>
+<p>Python可以基于greenlet、gevent库实现协程，也可以基于原生的yield生成器、asyncio异步协程来实现。</p>
+<p>其中yield生成器的实现如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">task1</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="comment"># 需要有 While True 来保证一直执行</span></span><br><span class="line">    <span class="keyword">while</span> <span class="keyword">True</span>:</span><br><span class="line">        print(<span class="string">"task 1 before yield"</span>)</span><br><span class="line">        <span class="keyword">yield</span></span><br><span class="line">        print(<span class="string">"task 1 after yield"</span>)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">task2</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="keyword">while</span> <span class="keyword">True</span>:</span><br><span class="line">        print(<span class="string">"task 2 before yield"</span>)</span><br><span class="line">        <span class="keyword">yield</span></span><br><span class="line">        print(<span class="string">"task 2 after yield"</span>)</span><br><span class="line">        </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">main</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="comment"># 生成器对象</span></span><br><span class="line">    t1 = task1()</span><br><span class="line">    t2 = task2()</span><br><span class="line">    print(<span class="string">"init"</span>)</span><br><span class="line">    next(t1)</span><br><span class="line">    print(<span class="string">"switch from t1 to t2"</span>)</span><br><span class="line">    next(t2)</span><br><span class="line">    print(<span class="string">"switch from t2 to t1"</span>)</span><br><span class="line">    next(t1)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure>
+<h1 id="0x04-补充材料"><a href="#0x04-补充材料" class="headerlink" title="0x04 补充材料"></a>0x04 补充材料</h1><h2 id="4-1-Amdahl-定律"><a href="#4-1-Amdahl-定律" class="headerlink" title="4.1 Amdahl 定律"></a>4.1 Amdahl 定律</h2><p>阿姆达尔定律（Amdahl’s law，Amdahl’s argument）是计算机科学界的经验法则，因 Gene Amdahl 而得名。它代表了处理器并行运算之后效率提升的能力。</p>
+<p>阿姆达尔定律是计算总量不变时时的量化标准，可以使用公式 <code>((Ws + Wp) / (Ws + Wp / p))</code> 来表示。</p>
+<h1 id="0x05-参考链接"><a href="#0x05-参考链接" class="headerlink" title="0x05 参考链接"></a>0x05 参考链接</h1><ul>
+<li><a href="https://docs.python.org/zh-cn/3/library/asyncio-task.html" target="_blank" rel="noopener">Python3 文档 协程与任务</a></li>
+<li><a href="http://doc.pypy.org/en/latest/faq.html#does-pypy-have-a-gil-why" target="_blank" rel="noopener">Does PyPy have a GIL? Why?</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Amdahl%27s_law" target="_blank" rel="noopener">Amdahl’s law</a></li>
+</ul>
+
+      
+
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
+        </div>
+      
+    </div>
+    <div class="article-info article-info-index">
       
       
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2019" class="archive-year">2019</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/10/19/cmdi/" class="archive-article-date">
-  	<time datetime="2019-10-19T01:23:51.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-10-19</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/10/19/cmdi/">命令注入成因小谈</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">Command Injection</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">Python</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
+      
 	<div class="article-category tagcloud">
 		<i class="icon-book icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="/categories/Web//" class="article-tag-list-link color4">Web</a>
+        			<a href="/categories/Programing//" class="article-tag-list-link color1">Programing</a>
         		</li>
       		
 		</ul>
 	</div>
 
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=https://LyleMi.github.io/2020/06/15/python-coroutine-thread-and-process/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/06/18/unicode-sec-1/" class="archive-article-date">
-  	<time datetime="2019-06-18T14:41:40.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-06-18</time>
-</a>
+<nav id="article-nav">
+  
+  
+    <a href="/2020/04/14/transparently-running-binaries-from-any-architecture-in-linux-with-qemu-and-binfmt-misc/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">基于QEMU和binfmt-misc透明运行不同架构程序</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/06/18/unicode-sec-1/">浅谈Unicode设计的安全性</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">Unicode</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Misc//" class="article-tag-list-link color5">Misc</a>
-        		</li>
-      		
-		</ul>
-	</div>
+        
+        
+    </div>
+</aside>
 
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/06/12/xss-auto/" class="archive-article-date">
-  	<time datetime="2019-06-12T02:37:07.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-06-12</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/06/12/xss-auto/">基于污点分析的XSS漏洞辅助挖掘的一种方式</a>
-    </h1>
-  
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">XSS</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">自动化</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Web//" class="article-tag-list-link color4">Web</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/04/20/cve-2019-0232/" class="archive-article-date">
-  	<time datetime="2019-04-20T04:43:30.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-04-20</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/04/20/cve-2019-0232/">CVE-2019-0232：Apache Tomcat RCE漏洞分析</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">CVE</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Web//" class="article-tag-list-link color4">Web</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/04/06/Web-Application-Auto-Audit/" class="archive-article-date">
-  	<time datetime="2019-04-06T10:17:22.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-04-06</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/04/06/Web-Application-Auto-Audit/">Web应用代码自动化审计浅谈</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">自动化</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Web//" class="article-tag-list-link color4">Web</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/02/27/bypass-xss-mitigation-via-gadgets/" class="archive-article-date">
-  	<time datetime="2019-02-27T01:49:17.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-02-27</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/02/27/bypass-xss-mitigation-via-gadgets/">基于Gadgets绕过XSS防御机制</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">XSS</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Web//" class="article-tag-list-link color4">Web</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
   
   
-    </div></section>
   
 
-    
+  
+
+  
+
+  
 
 
           </div>
@@ -472,8 +356,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,
