@@ -6,20 +6,15 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://LyleMi.github.io">
-  <title>CVE-2019-5096 GoAhead Double Free 漏洞分析 | Lyle&#39;s Blog</title>
+  <title>Archives: 2020/7 | Lyle&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="简介GoAhead是美国Embedthis Software公司的一款嵌入式Web服务器，提供开源和企业版本，用于全球数亿台设备中。CVE-2019-5096由思科 Talos 团队的研究员发现，可以在Pre-Auth的条件下触发漏洞。">
-<meta name="keywords" content="CVE">
-<meta property="og:type" content="article">
-<meta property="og:title" content="CVE-2019-5096 GoAhead Double Free 漏洞分析">
-<meta property="og:url" content="https://LyleMi.github.io/2020/06/30/2020-06-30-cve-2019-5096/index.html">
+  <meta property="og:type" content="website">
+<meta property="og:title" content="Lyle&#39;s Blog">
+<meta property="og:url" content="https://LyleMi.github.io/archives/2020/07/index.html">
 <meta property="og:site_name" content="Lyle&#39;s Blog">
-<meta property="og:description" content="简介GoAhead是美国Embedthis Software公司的一款嵌入式Web服务器，提供开源和企业版本，用于全球数亿台设备中。CVE-2019-5096由思科 Talos 团队的研究员发现，可以在Pre-Auth的条件下触发漏洞。">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2020-06-30T11:42:00.725Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="CVE-2019-5096 GoAhead Double Free 漏洞分析">
-<meta name="twitter:description" content="简介GoAhead是美国Embedthis Software公司的一款嵌入式Web服务器，提供开源和企业版本，用于全球数亿台设备中。CVE-2019-5096由思科 Talos 团队的研究员发现，可以在Pre-Auth的条件下触发漏洞。">
+<meta name="twitter:title" content="Lyle&#39;s Blog">
   
     <link rel="alternative" href="/atom.xml" title="Lyle&#39;s Blog" type="application/atom+xml">
   
@@ -141,92 +136,36 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            <article id="post-2020-06-30-cve-2019-5096" class="article article-type-post " itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
+            
   
-    <h1 class="article-title" itemprop="name">
-      CVE-2019-5096 GoAhead Double Free 漏洞分析
+  
+    
+    
+      
+      
+      <section class="archives-wrap">
+        <div class="archive-year-wrap">
+          <a href="/archives/2020" class="archive-year">2020</a>
+        </div>
+        <div class="archives">
+    
+    <article class="archive-article archive-type-post">
+  <div class="archive-article-inner">
+    <header class="archive-article-header">
+      	<div class="article-meta">
+	      	<a href="/2020/07/01/2020-7-1-cve-2020-8617/" class="archive-article-date">
+  	<time datetime="2020-07-01T11:03:26.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-07-01</time>
+</a>
+        </div>
+    	 
+  
+    <h1 itemprop="name">
+      <a class="archive-article-title" href="/2020/07/01/2020-7-1-cve-2020-8617/">CVE-2020-8617 Bind9 DOS 漏洞</a>
     </h1>
   
 
-        
-        <a href="/2020/06/30/2020-06-30-cve-2019-5096/" class="archive-article-date">
-  	<time datetime="2020-06-30T11:34:20.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-06-30</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>GoAhead是美国Embedthis Software公司的一款嵌入式Web服务器，提供开源和企业版本，用于全球数亿台设备中。CVE-2019-5096由思科 Talos 团队的研究员发现，可以在Pre-Auth的条件下触发漏洞。</p>
-<a id="more"></a>
-<h3 id="时间线"><a href="#时间线" class="headerlink" title="时间线"></a>时间线</h3><ul>
-<li>报告漏洞 2019-08-28</li>
-<li>漏洞修复 2019-11-21</li>
-<li>漏洞公开 2019-12-02</li>
-</ul>
-<h3 id="漏洞影响范围"><a href="#漏洞影响范围" class="headerlink" title="漏洞影响范围"></a>漏洞影响范围</h3><ul>
-<li>GoAhead 5.0.1</li>
-<li>GoAhead 3.6.5</li>
-<li>GoAhead 4.1.1</li>
-</ul>
-<h2 id="复现"><a href="#复现" class="headerlink" title="复现"></a>复现</h2><h3 id="PoC"><a href="#PoC" class="headerlink" title="PoC"></a>PoC</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line">url = <span class="string">'http://127.0.0.1:8777'</span></span><br><span class="line">files = &#123;</span><br><span class="line">    <span class="string">"file1"</span>: (<span class="string">'filename'</span>, <span class="string">'data'</span>),</span><br><span class="line">    <span class="string">"file2"</span>: (<span class="string">'filename'</span>, <span class="string">'data'</span>),</span><br><span class="line">&#125;</span><br><span class="line">r = requests.post(url, files=files)</span><br></pre></td></tr></table></figure>
-<h3 id="调用栈"><a href="#调用栈" class="headerlink" title="调用栈"></a>调用栈</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">#2  0x00007ffff77c17ea in __libc_message (do_abort=do_abort@entry=0x2,</span><br><span class="line">    fmt=fmt@entry=0x7ffff78daed8 &quot;*** Error in `%s&apos;: %s: 0x%s ***\n&quot;) at ../sysdeps/posix/libc_fatal.c:175</span><br><span class="line">#3  0x00007ffff77ca37a in malloc_printerr (ar_ptr=&lt;optimized out&gt;, ptr=&lt;optimized out&gt;,</span><br><span class="line">    str=0x7ffff78dafe8 &quot;double free or corruption (out)&quot;, action=0x3) at malloc.c:5006</span><br><span class="line">#4  _int_free (av=&lt;optimized out&gt;, p=&lt;optimized out&gt;, have_lock=0x0) at malloc.c:3867</span><br><span class="line">#5  0x00007ffff77ce53c in __GI___libc_free (mem=&lt;optimized out&gt;) at malloc.c:2968</span><br><span class="line">#6  0x00007ffff7b2ee1c in wfree (mem=0x611260) at src/alloc.c:292</span><br><span class="line">#7  0x00007ffff7b4f1ba in freeUploadFile (up=0x6112a0) at src/upload.c:71</span><br><span class="line">#8  0x00007ffff7b4f236 in websFreeUpload (wp=0x60cbd0) at src/upload.c:88</span><br><span class="line">#9  0x00007ffff7b363c5 in termWebs (wp=0x60cbd0, reuse=0x0) at src/http.c:518</span><br><span class="line">#10 0x00007ffff7b365de in websFree (wp=0x60cbd0) at src/http.c:561</span><br><span class="line">#11 0x00007ffff7b3bc0b in checkTimeout (arg=0x60cbd0, id=0x1) at src/http.c:2362</span><br><span class="line">#12 0x00007ffff7b45785 in callEvent (id=0x1) at src/runtime.c:232</span><br><span class="line">#13 0x00007ffff7b459a5 in websRunEvents () at src/runtime.c:295</span><br><span class="line">#14 0x00007ffff7b38e82 in websServiceEvents (finished=0x60310c &lt;finished&gt;) at src/http.c:1389</span><br><span class="line">#15 0x0000000000401544 in main (argc=0x4, argv=0x7fffffffe4d8, envp=0x7fffffffe500) at src/goahead.c:170</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
-<h2 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h2><p>函数调用流程为</p>
-<ul>
-<li>websProcessUploadData</li>
-<li>initUpload</li>
-<li>processContentBoundary</li>
-<li>processUploadHeader</li>
-<li>processContentData</li>
-</ul>
-<p>其中 <code>processUploadHeader</code> 函数会调用 <code>freeUploadFile</code> free 掉 <code>wp-&gt;currentFile</code></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">processUploadHeader</span><span class="params">(Webs *wp, <span class="keyword">char</span> *line)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    ...</span><br><span class="line">    freeUploadFile(wp-&gt;currentFile);</span><br><span class="line">    file = wp-&gt;currentFile = walloc(<span class="keyword">sizeof</span>(WebsUpload));</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><code>processContentData</code> 函数会把上传文件加入到 <code>wp-&gt;files</code> 中</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">bool</span> <span class="title">processContentData</span><span class="params">(Webs *wp)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    ...</span><br><span class="line">    hashEnter(wp-&gt;files, wp-&gt;uploadVar, valueSymbol(file), <span class="number">0</span>);</span><br><span class="line">    defineUploadVars(wp);</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>在请求执行完毕后，会进入 <code>termWebs</code> -&gt; <code>websFreeUpload</code> 的执行流，将 <code>wp-&gt;files</code> 中的 <code>WebsUpload</code> 对象全部 free 一次。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">PUBLIC <span class="keyword">void</span> <span class="title">websFreeUpload</span><span class="params">(Webs *wp)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    WebsUpload  *up;</span><br><span class="line">    WebsKey     *s;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (wp-&gt;files &gt;= <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">for</span> (s = hashFirst(wp-&gt;files); s; s = hashNext(wp-&gt;files, s)) &#123;</span><br><span class="line">            up = s-&gt;content.value.symbol;</span><br><span class="line">            freeUploadFile(up);</span><br><span class="line">            <span class="keyword">if</span> (up == wp-&gt;currentFile) &#123;</span><br><span class="line">                wp-&gt;currentFile = <span class="number">0</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        hashFree(wp-&gt;files);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (wp-&gt;currentFile) &#123;</span><br><span class="line">        freeUploadFile(wp-&gt;currentFile);</span><br><span class="line">        wp-&gt;currentFile = <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (wp-&gt;upfd &gt;= <span class="number">0</span>) &#123;</span><br><span class="line">        close(wp-&gt;upfd);</span><br><span class="line">        wp-&gt;upfd = <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>可以看到漏洞触发点是在 <code>freeUploadFile</code> 函数，这里仅仅检查了 <code>up-&gt;filename</code> 的值。但是在上传多个文件时，之前的 <code>WebsUpload</code> 对象被 free 掉后仍然在链表中，会触发第二次 free。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">freeUploadFile</span><span class="params">(WebsUpload *up)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (up) &#123;</span><br><span class="line">        <span class="keyword">if</span> (up-&gt;filename) &#123;</span><br><span class="line">            unlink(up-&gt;filename);</span><br><span class="line">            wfree(up-&gt;filename);</span><br><span class="line">        &#125;</span><br><span class="line">        wfree(up-&gt;clientFilename);</span><br><span class="line">        wfree(up-&gt;contentType);</span><br><span class="line">        wfree(up);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="漏洞Patch"><a href="#漏洞Patch" class="headerlink" title="漏洞Patch"></a>漏洞Patch</h3><p>补丁修补方式为在 <code>processContentData</code> 函数加入链表后置 <code>wp-&gt;currentFile</code> 为空。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">bool</span> <span class="title">processContentData</span><span class="params">(Webs *wp)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    ...</span><br><span class="line">    hashEnter(wp-&gt;files, wp-&gt;uploadVar, valueSymbol(file), <span class="number">0</span>);</span><br><span class="line">    defineUploadVars(wp);</span><br><span class="line">    wp-&gt;currentFile = <span class="number">0</span>;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h2><ul>
-<li><a href="https://blog.talosintelligence.com/2019/12/vulnerability-spotlight-EmbedThis-GoAhead.html" target="_blank" rel="noopener">Vulnerability Spotlight: Two vulnerabilities in EmbedThis GoAhead </a></li>
-<li><a href="https://www.anquanke.com/post/id/194322" target="_blank" rel="noopener">CVE-2019-5096：GoAhead远程代码执行漏洞分析</a></li>
-<li><a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-5096" target="_blank" rel="noopener">CVE-2019-5096</a></li>
-</ul>
-
-      
-
-      
-        <div class="page-reward">
-          <a href="javascript:;" class="page-reward-btn tooltip-top">
-            <div class="tooltip tooltip-east">
-            <span class="tooltip-item">
-              赏
-            </span>
-            <span class="tooltip-content">
-              <span class="tooltip-text">
-                <span class="tooltip-inner">
-                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
-                  <div class="reward-box">
-                    
-                    
-                  </div>
-                </span>
-              </span>
-            </span>
-          </div>
-          </a>
-        </div>
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
+        <div class="article-info info-on-right">
+          
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
@@ -238,115 +177,19 @@
 		</ul>
 	</div>
 
-      
+          
 
-      
-
-      
-        
-<div class="share-btn share-icons tooltip-left">
-  <div class="tooltip tooltip-east">
-    <span class="tooltip-item">
-      <a href="javascript:;" class="share-sns share-outer">
-        <i class="icon icon-share"></i>
-      </a>
-    </span>
-    <span class="tooltip-content">
-      <div class="share-wrap">
-        <div class="share-icons">
-          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
-            <i class="icon icon-weibo"></i>
-          </a>
-          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
-            <i class="icon icon-weixin"></i>
-          </a>
-          <a class="qq share-sns" href="javascript:;" data-type="qq">
-            <i class="icon icon-qq"></i>
-          </a>
-          <a class="douban share-sns" href="javascript:;" data-type="douban">
-            <i class="icon icon-douban"></i>
-          </a>
-          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
-            <i class="icon icon-qzone"></i>
-          </a>
-          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
-            <i class="icon icon-facebook"></i>
-          </a>
-          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
-            <i class="icon icon-twitter"></i>
-          </a>
-          <a class="google share-sns" href="javascript:;" data-type="google">
-            <i class="icon icon-google"></i>
-          </a>
         </div>
-      </div>
-    </span>
-  </div>
-</div>
-
-<div class="page-modal wx-share js-wx-box">
-    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
-    <p>扫一扫，分享到微信</p>
-    <div class="wx-qrcode">
-      <img src="//pan.baidu.com/share/qrcode?url=https://LyleMi.github.io/2020/06/30/2020-06-30-cve-2019-5096/" alt="微信分享二维码">
-    </div>
-</div>
-
-<div class="mask js-mask"></div>
-      
-      <div class="clearfix"></div>
-    </div>
+        <div class="clearfix"></div>
+    </header>
   </div>
 </article>
-
-  
-<nav id="article-nav">
-  
-    <a href="/2020/07/01/2020-7-1-cve-2020-8617/" id="article-nav-newer" class="article-nav-link-wrap">
-      <i class="icon-circle-left"></i>
-      <div class="article-nav-title">
-        
-          CVE-2020-8617 Bind9 DOS 漏洞
-        
-      </div>
-    </a>
   
   
-    <a href="/2020/06/15/python-coroutine-thread-and-process/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">Python 进程、线程与协程</div>
-      <i class="icon-circle-right"></i>
-    </a>
-  
-</nav>
-
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-  
-  
+    </div></section>
   
 
-  
-
-  
-
-  
+    
 
 
           </div>
@@ -369,8 +212,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: true,
-		isArchive: false,
+		isPost: false,
+		isArchive: true,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,
