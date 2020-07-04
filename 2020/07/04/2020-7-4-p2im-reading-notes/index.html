@@ -6,15 +6,25 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://LyleMi.github.io">
-  <title>Archives | Lyle&#39;s Blog</title>
+  <title>Usenix 2020 P²IM 论文阅读笔记 | Lyle&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Lyle&#39;s Blog">
-<meta property="og:url" content="https://LyleMi.github.io/archives/index.html">
+  <meta name="description" content="摘要对固件设备的测试通常受限于硬件支持，难以规模化，这在一定程度上导致了IoT漏洞的泛滥。因此文章提出了一种名为P²IM的方法，可以执行自动化的仿真测试。文章中对70个样例固件和10个真实设备的固件进行了测试，真实固件包括无人机、机器人、PLC等。在没有人工辅助的情况下，可以执行79%的固件。经过测试，文章找到了7个不同的bug。">
+<meta name="keywords" content="论文阅读">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Usenix 2020 P²IM 论文阅读笔记">
+<meta property="og:url" content="https://LyleMi.github.io/2020/07/04/2020-7-4-p2im-reading-notes/index.html">
 <meta property="og:site_name" content="Lyle&#39;s Blog">
+<meta property="og:description" content="摘要对固件设备的测试通常受限于硬件支持，难以规模化，这在一定程度上导致了IoT漏洞的泛滥。因此文章提出了一种名为P²IM的方法，可以执行自动化的仿真测试。文章中对70个样例固件和10个真实设备的固件进行了测试，真实固件包括无人机、机器人、PLC等。在没有人工辅助的情况下，可以执行79%的固件。经过测试，文章找到了7个不同的bug。">
 <meta property="og:locale" content="default">
+<meta property="og:image" content="https://lylemi.github.io/images/2020-7-4/1.png">
+<meta property="og:image" content="https://lylemi.github.io/images/2020-7-4/4.png">
+<meta property="og:image" content="https://lylemi.github.io/images/2020-7-4/2.png">
+<meta property="og:image" content="https://lylemi.github.io/images/2020-7-4/3.png">
+<meta property="og:updated_time" content="2020-07-04T06:02:04.929Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Lyle&#39;s Blog">
+<meta name="twitter:title" content="Usenix 2020 P²IM 论文阅读笔记">
+<meta name="twitter:description" content="摘要对固件设备的测试通常受限于硬件支持，难以规模化，这在一定程度上导致了IoT漏洞的泛滥。因此文章提出了一种名为P²IM的方法，可以执行自动化的仿真测试。文章中对70个样例固件和10个真实设备的固件进行了测试，真实固件包括无人机、机器人、PLC等。在没有人工辅助的情况下，可以执行79%的固件。经过测试，文章找到了7个不同的bug。">
+<meta name="twitter:image" content="https://lylemi.github.io/images/2020-7-4/1.png">
   
     <link rel="alternative" href="/atom.xml" title="Lyle&#39;s Blog" type="application/atom+xml">
   
@@ -136,36 +146,90 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-2020-7-4-p2im-reading-notes" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2020" class="archive-year">2020</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2020/07/04/2020-7-4-p2im-reading-notes/" class="archive-article-date">
-  	<time datetime="2020-07-04T02:52:36.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-07-04</time>
-</a>
-        </div>
-    	 
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/07/04/2020-7-4-p2im-reading-notes/">Usenix 2020 P²IM 论文阅读笔记</a>
+    <h1 class="article-title" itemprop="name">
+      Usenix 2020 P²IM 论文阅读笔记
     </h1>
   
 
-        <div class="article-info info-on-right">
-          
+        
+        <a href="/2020/07/04/2020-7-4-p2im-reading-notes/" class="archive-article-date">
+  	<time datetime="2020-07-04T02:52:36.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-07-04</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="摘要"><a href="#摘要" class="headerlink" title="摘要"></a>摘要</h2><p>对固件设备的测试通常受限于硬件支持，难以规模化，这在一定程度上导致了IoT漏洞的泛滥。因此文章提出了一种名为P²IM的方法，可以执行自动化的仿真测试。文章中对70个样例固件和10个真实设备的固件进行了测试，真实固件包括无人机、机器人、PLC等。在没有人工辅助的情况下，可以执行79%的固件。经过测试，文章找到了7个不同的bug。</p>
+<a id="more"></a>
+<h2 id="论文信息"><a href="#论文信息" class="headerlink" title="论文信息"></a>论文信息</h2><ul>
+<li>论文标题: P²IM: Scalable and Hardware-independent Firmware Testing via Automatic Peripheral Interface Modeling</li>
+<li>论文作者: Bo Feng, Alejandro Mera, Long Lu</li>
+<li>作者单位: Northeastern University</li>
+<li>发表期刊：Usenix</li>
+<li>发表时间：2020</li>
+</ul>
+<h2 id="研究背景"><a href="#研究背景" class="headerlink" title="研究背景"></a>研究背景</h2><p>文章主要目标是对微控制器（Microcontrollers, MCU）进行测试，微控制器是在特定场景下功耗更优的机器。MCU的固件通常包含：设备驱动、微型操作系统、系统库、一些特殊的逻辑/应用等。</p>
+<h2 id="研究挑战"><a href="#研究挑战" class="headerlink" title="研究挑战"></a>研究挑战</h2><p>对微控制器固件进行测试要解决的问题主要有硬件依赖、外设、多样化的系统设计，不完整的测试接口等。</p>
+<p>硬件依赖主要是大部分之前的测试工作都依靠硬件完成，但是目前的硬件仿真并不完备，会在相当程度上影响测试效率。使用实体设备的话，在规模化时又会遇到问题。</p>
+<p>此外，每一个固件都会和大量的外设有交互。这些外设是MCU厂商自定制的，有不同的接口和交互方式。因此通常需要不同的模拟器，需要大量的定制工作。</p>
+<p>和平常使用的操作系统不同，MCU设备会使用更多的自定制系统/系统库，有相当多样化的系统设计。这在模糊测试中也是需要考虑的。</p>
+<p>普通的程序是基于标准I/O或文件，但是固件大部分是从外设中直接读取的，测试接口并不完整，Fuzzer需要满足和设备的交互功能。</p>
+<h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><p>文章的主要贡献是提出了P²IM(Processor-Peripheral Interface Modeling)，即对外设进行自动化的建模来解决问题。MCU设备的外设有片上(on-chip)外设的，也有芯片外(off-chip)的外设，因为芯片无法直接控制 off-chip 这里文章仅考虑芯片上外设的建模。</p>
+<p>这里主要使用抽象模型定义(Abstract Model Definition)和自动模块实例化(Automatic Model Instantiation)来完成模块。抽象模型定义基于专家经验定义模型，把寄存器分为控制寄存器、状态寄存器、数据寄存器、控制-状态寄存器。</p>
+<p>自动模块实例化则基于之前的模型定义，基于执行对模型进行填充。主要是查找寄存器的类型、寄存器在内存中的位置、中断等。具体工作流如下图所示：</p>
+<p><img src="/images/2020-7-4/1.png" alt="工作流"></p>
+<p>文章基于P²IE(Processor-Peripheral Interface Equivalence)来标定仿真的正确性，主要的三个指标为仿真器仿真了对应的外设接口、仿真器的行为和固件期望的行为一致、固件运行中没有crash/hang或者跳过一些操作。</p>
+<h2 id="实验测试"><a href="#实验测试" class="headerlink" title="实验测试"></a>实验测试</h2><p>文章测试环境为 <code>Intel® Core™ i5-7260U CPU @ 2.20GHz</code> <code>8 GB RAM</code> <code>Ubuntu 16.04</code> 。</p>
+<h4 id="单元测试"><a href="#单元测试" class="headerlink" title="单元测试"></a>单元测试</h4><p>文章选择了3个常用的MCU系统库(NuttX, RIOT, and Arduino)和3个MCU SoCs (STM32 F103RB, NXP MK64FN1M0VLL12, and Atmel SAM3X8E)来进行单元测试的实验。这些MCN SoC来自于不同的主要厂商，也被集成进入了不同的设备中。</p>
+<p>基于上述的选择，文章找到了70个不同的样例固件用于测试。在这些测试例中，寄存器类型的正确判断率为 76% 到 92%。基于P²IE进行判断，测试的准确率达到了79%。</p>
+<p>具体测试数据如下图：</p>
+<p><img src="/images/2020-7-4/4.png" alt="测试数据"></p>
+<h4 id="真实设备测试"><a href="#真实设备测试" class="headerlink" title="真实设备测试"></a>真实设备测试</h4><p>文章选取了十个真实设备进行测试，包括自平衡机器人、PLC、网关、无人机等，这些设备更加复杂，多样性更多。在真实设备的测试中，文章取得了更好的结果，只有 8.2% 的寄存器误分类率。除了在 Soldering Iron 的两例误分类导致的运行终止外，框架均正确的运行。在最后，文章总共发现了7个不同的bug。</p>
+<p>准确率数据如下图：</p>
+<p><img src="/images/2020-7-4/2.png" alt="准确率数据"></p>
+<p>误分类数据如下图：</p>
+<p><img src="/images/2020-7-4/3.png" alt="误分类数据"></p>
+<h2 id="待完善项"><a href="#待完善项" class="headerlink" title="待完善项"></a>待完善项</h2><p>文章的未完善的部分主要是没有实现Direct Memory Access、只支持ARM架构。P²IM只实现了对寄存器和中断的，没有实现DMA的情况。这里主要是因为DMA依赖固件的设计，不同的固件间不同。加上文章在测试时只有不到十分之一的固件使用DMA，所以文章不对DMA进行实现。</p>
+<p>在非ARM架构的MCU上，文章测试了三种不同架构的MCU，包括ATmega328P (AVR)、PIC32MX440F256H (MIPS)、FE310-G000 (RISC-V)。基于对架构的分析，作者认为这种方式是可以在不同架构间通用的。不过在一些特殊的架构(AVR)上，还需要一定的定制化支持。</p>
+<h2 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h2><ul>
+<li><a href="https://www.usenix.org/conference/usenixsecurity20/presentation/feng" target="_blank" rel="noopener">P²IM: Scalable and Hardware-independent Firmware Testing via Automatic Peripheral Interface Modeling</a></li>
+</ul>
+
+      
+
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
+        </div>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
@@ -177,459 +241,105 @@
 		</ul>
 	</div>
 
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2020/07/01/2020-7-1-cve-2020-8617/" class="archive-article-date">
-  	<time datetime="2020-07-01T11:03:26.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-07-01</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/07/01/2020-7-1-cve-2020-8617/">CVE-2020-8617 Bind9 DOS 漏洞</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">CVE</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2020/06/30/2020-06-30-cve-2019-5096/" class="archive-article-date">
-  	<time datetime="2020-06-30T11:34:20.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-06-30</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/06/30/2020-06-30-cve-2019-5096/">CVE-2019-5096 GoAhead Double Free 漏洞分析</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">CVE</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2020/06/15/python-coroutine-thread-and-process/" class="archive-article-date">
-  	<time datetime="2020-06-15T11:48:12.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-06-15</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/06/15/python-coroutine-thread-and-process/">Python 进程、线程与协程</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">Python</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Programing//" class="article-tag-list-link color1">Programing</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2020/04/14/transparently-running-binaries-from-any-architecture-in-linux-with-qemu-and-binfmt-misc/" class="archive-article-date">
-  	<time datetime="2020-04-14T03:23:47.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-14</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/04/14/transparently-running-binaries-from-any-architecture-in-linux-with-qemu-and-binfmt-misc/">基于QEMU和binfmt-misc透明运行不同架构程序</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">QEMU</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">工具</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Bin//" class="article-tag-list-link color4">Bin</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2020/04/13/2020-04-13-tricks-1/" class="archive-article-date">
-  	<time datetime="2020-04-13T13:08:29.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-13</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/04/13/2020-04-13-tricks-1/">语言Tricks系列之一</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">Tricks</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Misc//" class="article-tag-list-link color5">Misc</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
       
-        </div></section>
+
       
+
       
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2019" class="archive-year">2019</a>
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/10/19/cmdi/" class="archive-article-date">
-  	<time datetime="2019-10-19T01:23:51.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-10-19</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/10/19/cmdi/">命令注入成因小谈</a>
-    </h1>
-  
+      </div>
+    </span>
+  </div>
+</div>
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">Command Injection</a>
-        		</li>
-      		
-		</ul>
-	</div>
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=https://LyleMi.github.io/2020/07/04/2020-7-4-p2im-reading-notes/" alt="微信分享二维码">
+    </div>
+</div>
 
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Web//" class="article-tag-list-link color4">Web</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/06/18/unicode-sec-1/" class="archive-article-date">
-  	<time datetime="2019-06-18T14:41:40.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-06-18</time>
-</a>
+<nav id="article-nav">
+  
+  
+    <a href="/2020/07/01/2020-7-1-cve-2020-8617/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">CVE-2020-8617 Bind9 DOS 漏洞</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/06/18/unicode-sec-1/">浅谈Unicode设计的安全性</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">Unicode</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Misc//" class="article-tag-list-link color5">Misc</a>
-        		</li>
-      		
-		</ul>
-	</div>
+        
+        
+    </div>
+</aside>
 
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/06/12/xss-auto/" class="archive-article-date">
-  	<time datetime="2019-06-12T02:37:07.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-06-12</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/06/12/xss-auto/">基于污点分析的XSS漏洞辅助挖掘的一种方式</a>
-    </h1>
-  
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">自动化</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">XSS</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Web//" class="article-tag-list-link color4">Web</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/04/20/cve-2019-0232/" class="archive-article-date">
-  	<time datetime="2019-04-20T04:43:30.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-04-20</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/04/20/cve-2019-0232/">CVE-2019-0232：Apache Tomcat RCE漏洞分析</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">CVE</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Web//" class="article-tag-list-link color4">Web</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
   
   
-    </div></section>
   
 
-    
-    <nav id="page-nav">
-      <span class="page-number current">1</span><a class="page-number" href="/archives/page/2/">2</a><a class="extend next" rel="next" href="/archives/page/2/">Next &raquo;</a>
-    </nav>
+  
+
+  
+
   
 
 
@@ -653,8 +363,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,
