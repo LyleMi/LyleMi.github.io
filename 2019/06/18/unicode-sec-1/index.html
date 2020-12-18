@@ -177,7 +177,7 @@
 <p>除了上面提到的两种情况，punycode也是一种视觉欺骗的形式，punycode是域名的一种编码，会以 <code>xn--</code> 开头，后面是普通的有效域名，例如 <code>аррӏе.com</code> 对应的punycode就是 <code>xn--80ak6aa92e.com</code>。当chrome认为这是一个视觉问题时，就会主动把域名以punycode显示，以减少混淆的影响。但是反过来，也能应用这种方式来实现视觉欺骗，例如 <code>䕮䕵䕶䕱.com</code> 的punycode形式就是 <code>xn--google.com</code>。</p>
 <h3 id="2-2-双向显示"><a href="#2-2-双向显示" class="headerlink" title="2.2 双向显示"></a>2.2 双向显示</h3><p>阿拉伯和希伯来语是从右往左阅读的，这在一些场景下可能造成问题。例如一个名为 <code>txt.exe</code> ，加入Unicode的控制字符后，在用户界面看起来是 <code>exe.txt</code> ，这样就有可能导致用户的误判。</p>
 <h3 id="2-3-数字显示"><a href="#2-3-数字显示" class="headerlink" title="2.3 数字显示"></a>2.3 数字显示</h3><p>一些国家的数字在显示的时候也可能造成问题，例如孟加拉语的0-9是০ ১ ২ ৩ ৪ ৫ ৬ ৭ ৮ ৯，但是这里的৪ (U+09EA) 实际上是数字4。ASIS CTF 2019 的 <a href="(https://github.com/hyperreality/ctf-writeups/tree/master/2019-asis">Unicorn Shop</a>) 也是从Unicode背后的数字角度出发考虑问题。</p>
-<h2 id="3-非视觉漏洞"><a href="#3-非视觉漏洞" class="headerlink" title="3. 非视觉漏洞"></a>3. 非视觉漏洞</h2><p>除了视觉漏洞之外，还有很多其他方面的漏洞。这些问题主要字符是转换导致的字符串。关于字符串处理转换的细节，可以参考我之前的这篇<a href="https://lylemi.github.io/2018/10/29/unicode-normalization/">文章</a>。</p>
+<h2 id="3-非视觉漏洞"><a href="#3-非视觉漏洞" class="headerlink" title="3. 非视觉漏洞"></a>3. 非视觉漏洞</h2><p>除了视觉漏洞之外，还有很多其他方面的漏洞。这些问题主要字符是转换导致的字符串。关于字符串处理转换的细节，可以参考我之前的这篇<a href="https://lylemi.github.io/2018/10/29/unicode-normalization/" target="_blank" rel="noopener">文章</a>。</p>
 <h3 id="3-1-等价形式"><a href="#3-1-等价形式" class="headerlink" title="3.1 等价形式"></a>3.1 等价形式</h3><p>在WAF类处理，很容易想到的是 <code>LocalHost</code> 和 <code>localhost</code> 等同，但是 <code>ⓛocaⓛhost</code> 这种情景就不太容易被处理。在SSRF中的防御中，如果没有做对应的处理，这种替换就可以完成一些bypass。</p>
 <h3 id="3-2-字符删除"><a href="#3-2-字符删除" class="headerlink" title="3.2 字符删除"></a>3.2 字符删除</h3><p>例如 <code>\x3c\x73\x63\x72\xc2\x69\x70\x74\x3e</code> 这个字符串中，而 <code>\xc2</code>  并不是任何一个有效字符的子串，在一些处理逻辑中，可能会删除 <code>\xc2</code> 这个字符，从而导致问题。</p>
 <h3 id="3-3-字符替换"><a href="#3-3-字符替换" class="headerlink" title="3.3 字符替换"></a>3.3 字符替换</h3><p>一些情况下，字符会被替换为其他的字符 如U+FFFF会被替换成 <code>?</code> 这在一些 <code>?</code> 有明确语义的情况下就会出现问题。</p>
@@ -189,8 +189,8 @@
 <li><a href="https://10kloc.wordpress.com/2013/08/25/plain-text-doesnt-exist-unicode-and-encodings-demystified/" target="_blank" rel="noopener">Unicode isn’t harmful for health – Unicode Myths debunked and encodings demystified</a></li>
 <li><a href="https://websec.github.io/unicode-security-guide/" target="_blank" rel="noopener">Unicode Security Guide</a></li>
 <li><a href="https://zhuanlan.zhihu.com/p/53714077" target="_blank" rel="noopener">其实你并不懂 Unicode</a></li>
-<li><a href="https://lylemi.github.io/2018/12/08/idnfuzz/">IDN Spoof漏洞自动化挖掘</a></li>
-<li><a href="https://lylemi.github.io/2018/10/29/unicode-normalization/">Unicode等价性浅谈</a></li>
+<li><a href="https://lylemi.github.io/2018/12/08/idnfuzz/" target="_blank" rel="noopener">IDN Spoof漏洞自动化挖掘</a></li>
+<li><a href="https://lylemi.github.io/2018/10/29/unicode-normalization/" target="_blank" rel="noopener">Unicode等价性浅谈</a></li>
 <li><a href="http://www.unicode.org/faq/security.html" target="_blank" rel="noopener">Unicode Security Issues FAQ</a></li>
 <li><a href="https://xlab.tencent.com/en/wp-content/uploads/2019/02/idn-visual-security-deep-thinking.pdf" target="_blank" rel="noopener">IDN Visual Security Deep Thinking</a></li>
 <li><a href="https://github.com/hyperreality/ctf-writeups/tree/master/2019-asis" target="_blank" rel="noopener">ASIS CTF 2019 Unicorn Shop Write-up</a></li>
